@@ -1,36 +1,32 @@
 package org.apache.servicecomb.embedsc.server.model;
 
-import org.apache.servicecomb.serviceregistry.api.registry.Microservice;
+import org.apache.servicecomb.foundation.common.concurrent.ConcurrentHashMapEx;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ApplicationContainer {
 ;
     // Map<appId, Map<serviceName, Map<version, Microservice>>>
-    private Map<String, Map<String, Map<String, Microservice>>> appContainer = new ConcurrentHashMap<>();
+    //private Map<String, Map<String, Map<String, Microservice>>> appContainer = new ConcurrentHashMap<>();
 
-    // return Map<serviceName, Map<version, Microservice>>
-    public Map<String, Map<String, Microservice>> getMicroservicesByAppIdMap(String appId) {
-         return appContainer.get(appId);
-     }
+    // key:appId
+    private Map<String, MicroserviceContainer> apps = new ConcurrentHashMapEx<>();
 
-    // return Map<version, Microservice>
-    public Map<String, Microservice> getMicroserviceVersionsByAppIdAndServiceNameMap(String appId, String serviceName) {
-        Map<String, Map<String, Microservice>> microservicesByAppIdMap = this.getMicroservicesByAppIdMap(appId);
-        if (microservicesByAppIdMap != null && !microservicesByAppIdMap.isEmpty()){
-            return microservicesByAppIdMap.get(serviceName);
-        }
-        return null;
+    public Map<String, MicroserviceContainer> getApps() {
+        return apps;
     }
 
-    // return Microservice
-    public Microservice getMicroserviceByAppIdAndServiceNameAndVersion(String appId, String serviceName, String version) {
-        Map<String, Microservice> microserviceVersionsByAppIdAndServiceNameMap = this.getMicroserviceVersionsByAppIdAndServiceNameMap(appId, serviceName);
-        if (microserviceVersionsByAppIdAndServiceNameMap != null && !microserviceVersionsByAppIdAndServiceNameMap.isEmpty()) {
-            return microserviceVersionsByAppIdAndServiceNameMap.get(version);
-        }
-        return null;
+    public void setApps(Map<String, MicroserviceContainer> apps) {
+        this.apps = apps;
+    }
+
+    public MicroserviceContainer getOrCreateMicroserviceContainer(String appId) {
+        return apps.computeIfAbsent(appId, id -> new MicroserviceContainer(this, appId));
+    }
+
+    public MicroserviceVersionContainer getOrCreateMicroserviceVersions(String appId, String serviceName) {
+        MicroserviceContainer microserviceContainer = getOrCreateMicroserviceContainer(appId);
+        return microserviceContainer.getOrCreateMicroserviceVersionContainer(serviceName);
     }
 
 }

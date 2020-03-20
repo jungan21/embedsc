@@ -7,7 +7,7 @@ import net.posick.mDNS.ServiceName;
 import org.apache.servicecomb.embedsc.server.model.ApplicationContainer;
 import org.apache.servicecomb.embedsc.server.model.MicroserviceRequest;
 import org.apache.servicecomb.embedsc.server.model.ServiceType;
-import org.apache.servicecomb.embedsc.server.model.ServiceFramework;
+import org.apache.servicecomb.embedsc.util.RegisterUtil;
 import org.apache.servicecomb.foundation.common.net.IpPort;
 import org.apache.servicecomb.serviceregistry.api.registry.Microservice;
 import org.apache.servicecomb.serviceregistry.api.response.GetSchemaResponse;
@@ -82,13 +82,8 @@ public class MicroserviceService{
 
     public String registerMicroservice(MicroserviceRequest microserviceRequest) {
 
-        if (applicationContainer.getMicroservicesByAppIdMap(microserviceRequest.getAppId()) == null){
-            applicationContainer.get
-        }
-        // add to ApplicationContainer
-        ApplicationContainer applicationContainer = new ApplicationContainer();
-        applicationContainer.getMicroservicesByAppIdMap()
-
+        // how to register Mapping ?   refer to AbstractServiceRegistry.registerMicroserviceMapping()？
+        // ApplicationContainer applicationContainer = RegisterUtil.getApplicationContainer();
 
         try {
             ServiceName serviceName = new ServiceName(microserviceRequest.getServiceName()+ "._http._tcp.local.");

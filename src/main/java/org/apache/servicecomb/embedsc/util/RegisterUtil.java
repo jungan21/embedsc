@@ -1,5 +1,6 @@
 package org.apache.servicecomb.embedsc.util;
 
+import org.apache.servicecomb.embedsc.server.model.ApplicationContainer;
 import org.apache.servicecomb.embedsc.server.model.MicroserviceRequest;
 import org.apache.servicecomb.embedsc.server.model.ServiceFramework;
 import org.apache.servicecomb.embedsc.server.model.ServiceType;
@@ -9,7 +10,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ClientToServerObjectConvertorUtil {
+public class RegisterUtil {
+
+    private static ApplicationContainer appContainer = new ApplicationContainer();
+
+    public static ApplicationContainer getApplicationContainer() {
+        return appContainer;
+    }
 
     public static MicroserviceRequest convertToMicroserviceRequest(Microservice microservice){
 

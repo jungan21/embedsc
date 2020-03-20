@@ -2,7 +2,7 @@ package org.apache.servicecomb.embedsc.client;
 
 import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
 import org.apache.servicecomb.embedsc.server.MicroserviceService;
-import org.apache.servicecomb.embedsc.util.ClientToServerObjectConvertorUtil;
+import org.apache.servicecomb.embedsc.util.RegisterUtil;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.*;
 import org.apache.servicecomb.serviceregistry.api.response.GetSchemaResponse;
@@ -51,7 +51,7 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public String registerMicroservice(Microservice microservice) {
-        return microserviceService.registerMicroservice(ClientToServerObjectConvertorUtil.convertToMicroserviceRequest(microservice));
+        return microserviceService.registerMicroservice(RegisterUtil.convertToMicroserviceRequest(microservice));
     }
 
     @Override
