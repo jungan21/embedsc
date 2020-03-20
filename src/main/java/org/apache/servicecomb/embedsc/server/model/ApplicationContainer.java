@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ApplicationContainer {
-
+;
     // Map<appId, Map<serviceName, Map<version, Microservice>>>
     private Map<String, Map<String, Map<String, Microservice>>> appContainer = new ConcurrentHashMap<>();
 

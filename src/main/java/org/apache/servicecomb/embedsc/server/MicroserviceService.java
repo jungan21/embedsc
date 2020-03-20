@@ -28,12 +28,10 @@ public class MicroserviceService{
 
     private IpPortManager ipPortManager;
 
-    private  ApplicationContainer appContainer;
+    private  static ApplicationContainer applicationContainer = new ApplicationContainer();;
 
     public MicroserviceService(IpPortManager ipPortManager){
         this.ipPortManager = ipPortManager;
-        this.appContainer = new ApplicationContainer();
-
     }
 
     public List<Microservice> getAllMicroservices() {
@@ -84,7 +82,9 @@ public class MicroserviceService{
 
     public String registerMicroservice(MicroserviceRequest microserviceRequest) {
 
-        if (appContainer.)
+        if (applicationContainer.getMicroservicesByAppIdMap(microserviceRequest.getAppId()) == null){
+            applicationContainer.get
+        }
         // add to ApplicationContainer
         ApplicationContainer applicationContainer = new ApplicationContainer();
         applicationContainer.getMicroservicesByAppIdMap()
