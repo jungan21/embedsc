@@ -1,7 +1,6 @@
 package org.apache.servicecomb.embedsc.server.model;
 
 import org.apache.servicecomb.foundation.common.concurrent.ConcurrentHashMapEx;
-import org.apache.servicecomb.serviceregistry.consumer.MicroserviceVersions;
 
 import java.util.Map;
 
@@ -12,23 +11,23 @@ public class MicroserviceContainer {
     private String appId;
 
     // Key: serviceName
-    private Map<String, MicroserviceVersionContainer> versionsByServiceName = new ConcurrentHashMapEx<>();
+    private Map<String, MicroserviceVersionContainer> services = new ConcurrentHashMapEx<>();
+
+    public Map<String, MicroserviceVersionContainer> getServices() {
+        return services;
+    }
+
+    public void setServices(Map<String, MicroserviceVersionContainer> services) {
+        this.services = services;
+    }
 
     public MicroserviceContainer(ApplicationContainer applicationContainer, String appId) {
         this.applicationContainer = applicationContainer;
         this.appId = appId;
     }
 
-    public Map<String, MicroserviceVersionContainer> getVersionsByServiceName() {
-        return versionsByServiceName;
-    }
-
-    public void setVersionsByServiceName(Map<String, MicroserviceVersionContainer> versionsByServiceName) {
-        this.versionsByServiceName = versionsByServiceName;
-    }
-
-    public  MicroserviceVersionContainer getOrCreateMicroserviceVersionContainer(String serviceName) {
-        return versionsByServiceName.computeIfAbsent(serviceName, name -> new MicroserviceVersionContainer(applicationContainer, appId, serviceName));
+    public MicroserviceVersionContainer getOrCreateMicroserviceVersionContainer(String serviceName) {
+        return services.computeIfAbsent(serviceName, name -> new MicroserviceVersionContainer(applicationContainer, appId, serviceName));
     }
 
 }

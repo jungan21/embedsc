@@ -13,7 +13,7 @@ public class MicroserviceVersionContainer {
     private String serviceName;
 
     // Key: version
-    private Map<String, MicroserviceInstanceContainer> serviceInstancesByAppIdAndServiceNameAndVersion = new ConcurrentHashMapEx<>();
+    private Map<String, ServerMicroservice> versions = new ConcurrentHashMapEx<>();
 
     public MicroserviceVersionContainer(ApplicationContainer applicationContainer, String appId, String serviceName) {
         this.applicationContainer = applicationContainer;
@@ -21,9 +21,16 @@ public class MicroserviceVersionContainer {
         this.serviceName = serviceName;
     }
 
-    public  MicroserviceInstanceContainer getOrCreateMicroserviceInstanceContainer(String version) {
-        return serviceInstancesByAppIdAndServiceNameAndVersion.computeIfAbsent(serviceName, name -> new MicroserviceInstanceContainer(applicationContainer, appId, serviceName, version));
+    public Map<String, ServerMicroservice> getVersions() {
+        return versions;
     }
 
+    public void setVersions(Map<String, ServerMicroservice> versions) {
+        this.versions = versions;
+    }
+
+    public ServerMicroservice getOrCreateServerMicroservice(String version) {
+        return versions.computeIfAbsent(version, v -> new ServerMicroservice(applicationContainer, appId, serviceName, version));
+    }
 
 }

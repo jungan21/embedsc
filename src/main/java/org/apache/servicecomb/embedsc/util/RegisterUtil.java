@@ -1,12 +1,11 @@
 package org.apache.servicecomb.embedsc.util;
 
 import org.apache.servicecomb.embedsc.server.model.ApplicationContainer;
-import org.apache.servicecomb.embedsc.server.model.MicroserviceRequest;
-import org.apache.servicecomb.embedsc.server.model.ServiceFramework;
-import org.apache.servicecomb.embedsc.server.model.ServiceType;
+import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
+import org.apache.servicecomb.serviceregistry.api.registry.Framework;
 import org.apache.servicecomb.serviceregistry.api.registry.Microservice;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,45 +13,78 @@ public class RegisterUtil {
 
     private static ApplicationContainer appContainer = new ApplicationContainer();
 
+    // key: serviceID
+    private static Map<String, ServerMicroservice>  serverMicroserviceMap = new HashMap<>();
+
     public static ApplicationContainer getApplicationContainer() {
         return appContainer;
     }
 
-    public static MicroserviceRequest convertToMicroserviceRequest(Microservice microservice){
+    public static Map<String, ServerMicroservice>  getServerMicroserviceMap() {
+        return serverMicroserviceMap;
+    }
 
+    public static ServerMicroservice convertToServerMicroservice(Microservice microservice){
+        ServerMicroservice serverMicroservice =  new ServerMicroservice();
+
+        // first time register Microservice, need to generate serviceId
         String serviceId = microservice.getServiceId();
         if (serviceId== null || serviceId.length() == 0){
             serviceId = UUID.nameUUIDFromBytes(generateServiceIndexKey(microservice).getBytes()).toString();
         }
 
-        Map<String, String> serviceTextAttributesMap = new LinkedHashMap<>();
+        serverMicroservice.setServiceId(serviceId);
+        serverMicroservice.setAppId(microservice.getAppId());
+        serverMicroservice.setServiceName(microservice.getServiceName());
+        serverMicroservice.setVersion(microservice.getVersion());
+        serverMicroservice.setLevel(microservice.getLevel());
+        serverMicroservice.setAlias(microservice.getAlias());
+        serverMicroservice.setSchemas(microservice.getSchemas());
+        serverMicroservice.setStatus(microservice.getStatus());
+        serverMicroservice.setRegisterBy(microservice.getRegisterBy());
+        serverMicroservice.setEnvironment(microservice.getEnvironment());
+        serverMicroservice.setProperties(microservice.getProperties());
+        serverMicroservice.setDescription(microservice.getDescription());
 
-        serviceTextAttributesMap.put("type", ServiceType.SERVICE.name());
-        serviceTextAttributesMap.put("serviceId", serviceId);
-        serviceTextAttributesMap.put("appId", microservice.getAppId());
-        serviceTextAttributesMap.put("serviceName", microservice.getServiceName());
-        serviceTextAttributesMap.put("version", microservice.getVersion());
-        serviceTextAttributesMap.put("level", microservice.getLevel());
-        serviceTextAttributesMap.put("schemas", microservice.getSchemas().toString());
-        serviceTextAttributesMap.put("status", microservice.getStatus());
-        serviceTextAttributesMap.put("registerBy", microservice.getRegisterBy());
-        serviceTextAttributesMap.put("environment", microservice.getEnvironment());
-        serviceTextAttributesMap.put("properties", microservice.getProperties().toString());
-        ServiceFramework serviceFramework = new ServiceFramework(microservice.getFramework().getName(), microservice.getFramework().getVersion());
-        serviceTextAttributesMap.put("framework", serviceFramework.toString());
+        // Framework object has name and value attributes
+        Map<String, String> framework = new HashMap<>();
+        framework.put("name", microservice.getFramework().getName());
+        framework.put("version", microservice.getFramework().getVersion());
+        serverMicroservice.setFramework(framework);
 
-        Map<String, String> schemaMap = microservice.getSchemaMap();
-        if (schemaMap != null && schemaMap.size() > 0 ){
-            for (Map.Entry<String, String> schemaMapEntry : schemaMap.entrySet()) {
-                String schemaId = schemaMapEntry.getKey();
-                String schemaContent = schemaMapEntry.getValue();
-                serviceTextAttributesMap.put("schema_" + schemaId, schemaContent);
-            }
+        serverMicroservice.setSchemaMap(microservice.getSchemaMap());
+
+        return serverMicroservice;
+    }
+
+
+    public static Microservice convertToClientMicroservice(ServerMicroservice serverMicroservice) {
+        Microservice microservice = new Microservice();
+
+        microservice.setServiceId(serverMicroservice.getServiceId());
+        microservice.setAppId(serverMicroservice.getAppId());
+        microservice.setServiceName(serverMicroservice.getServiceName());
+        microservice.setVersion(serverMicroservice.getVersion());
+        microservice.setLevel(serverMicroservice.getLevel());
+        microservice.setAlias(serverMicroservice.getAlias());
+        microservice.setSchemas(serverMicroservice.getSchemas());
+        microservice.setStatus(serverMicroservice.getStatus());
+        microservice.setRegisterBy(serverMicroservice.getRegisterBy());
+        microservice.setEnvironment(serverMicroservice.getEnvironment());
+        microservice.setDescription(serverMicroservice.getDescription());
+
+        Framework framework = new Framework();
+        framework.setName(serverMicroservice.getFramework().get("name"));
+        framework.setVersion(serverMicroservice.getFramework().get("version"));
+        microservice.setFramework(framework);
+
+        microservice.setProperties(serverMicroservice.getProperties());
+
+        for (Map.Entry<String, String> entry : serverMicroservice.getSchemaMap().entrySet()){
+            microservice.addSchema(entry.getKey(), entry.getValue());
         }
 
-        MicroserviceRequest microserviceRequest = new MicroserviceRequest(microservice.getAppId(), microservice.getServiceName(),microservice.getVersion(), serviceTextAttributesMap);
-        microserviceRequest.setServiceId(serviceId);
-        return microserviceRequest;
+        return microservice;
     }
 
     private static String generateServiceIndexKey(Microservice microservice){

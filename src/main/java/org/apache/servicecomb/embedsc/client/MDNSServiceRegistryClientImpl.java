@@ -51,12 +51,12 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public String registerMicroservice(Microservice microservice) {
-        return microserviceService.registerMicroservice(RegisterUtil.convertToMicroserviceRequest(microservice));
+        return microserviceService.registerMicroservice(RegisterUtil.convertToServerMicroservice(microservice));
     }
 
     @Override
     public Microservice getMicroservice(String microserviceId) {
-        return null;
+        return microserviceService.getMicroservice(microserviceId);
     }
 
     @Override
