@@ -3,6 +3,7 @@ package org.apache.servicecomb.embedsc.server;
 import net.posick.mDNS.MulticastDNSService;
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
+import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.foundation.common.net.IpPort;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.MicroserviceInstance;
@@ -31,23 +32,23 @@ public class MicroserviceInstanceService {
     }
 
 
-    public String registerMicroserviceInstance(MicroserviceInstance instance) {
-        try {
-            ServiceName serviceName = new ServiceName(instance.getInstanceId()+ "._http._tcp.local.");
-            Name hostname = new Name(instance.getHostName() + ".local.");
-            IpPort ipPort = ipPortManager.getAvailableAddress();
-            InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
-            ServiceInstance serviceInstance = new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), hostname, addresses, "");
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("register microservice instance: {} to mdns", serviceInstance);
-            }
-
-            ServiceInstance registeredService = new MulticastDNSService().register(serviceInstance);
-            return instance.getInstanceId();
-        } catch (IOException e) {
-            LOGGER.error("register microservice instance to mdns {} failed", instance, e);
-        }
+    public String registerMicroserviceInstance(ServerMicroserviceInstance serverMicroserviceInstance) {
+//        try {
+//            ServiceName serviceName = new ServiceName(serverMicroserviceInstance.getInstanceId() + "._http._tcp.local.");
+//            Name hostname = new Name(serverMicroserviceInstance.getHostName() + ".local.");
+//            IpPort ipPort = ipPortManager.getAvailableAddress();
+//            InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
+//            ServiceInstance serviceInstance = new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), hostname, addresses, "");
+//
+//            if (LOGGER.isDebugEnabled()) {
+//                LOGGER.debug("register microservice instance: {} to mdns", serviceInstance);
+//            }
+//
+//            ServiceInstance registeredService = new MulticastDNSService().register(serviceInstance);
+//            return instance.getInstanceId();
+//        } catch (IOException e) {
+//            LOGGER.error("register microservice instance to mdns {} failed", instance, e);
+//        }
         return null;
     }
 

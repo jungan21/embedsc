@@ -66,10 +66,19 @@ public class MicroserviceService{
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("register microservice : {} to mdns", service);
             }
+
+            // register to  MDNS
             new MulticastDNSService().register(service);
 
             // keep track of: <serviceId, serverMicroservice> map
             RegisterUtil.getServerMicroserviceMap().put(serverMicroservice.getServiceId(), serverMicroservice);
+
+            // register mappings
+            ApplicationContainer applicationContainer = RegisterUtil.getApplicationContainer();
+            applicationContainer.getOrCreateServerMicroservice(serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
+
+            // register to local in-memory map which can reflect the mapping relationship
+            RegisterUtil.registerMicroservice(serverMicroservice);
 
             return serverMicroservice.getServiceId();
         } catch (IOException e) {

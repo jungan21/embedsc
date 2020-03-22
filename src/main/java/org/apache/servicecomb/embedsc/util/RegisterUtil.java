@@ -1,11 +1,19 @@
 package org.apache.servicecomb.embedsc.util;
 
 import org.apache.servicecomb.embedsc.server.model.ApplicationContainer;
+import org.apache.servicecomb.embedsc.server.model.MicroserviceContainer;
+import org.apache.servicecomb.embedsc.server.model.MicroserviceVersionContainer;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
+import org.apache.servicecomb.serviceregistry.RegistryUtils;
 import org.apache.servicecomb.serviceregistry.api.registry.Framework;
 import org.apache.servicecomb.serviceregistry.api.registry.Microservice;
+import org.apache.servicecomb.serviceregistry.api.registry.MicroserviceInstance;
+import org.apache.servicecomb.serviceregistry.consumer.MicroserviceManager;
+import org.apache.servicecomb.serviceregistry.consumer.StaticMicroserviceVersions;
+import org.apache.servicecomb.serviceregistry.definition.MicroserviceNameParser;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -86,6 +94,20 @@ public class RegisterUtil {
 
         return microservice;
     }
+
+    public static void registerMicroservice(ServerMicroservice serverMicroservice) {
+        ApplicationContainer applicationContainer = RegisterUtil.getApplicationContainer();
+        ServerMicroservice registeredServerMicroservice = applicationContainer.getOrCreateServerMicroservice(
+                serverMicroservice.getAppId(),
+                serverMicroservice.getServiceName(),
+                serverMicroservice.getVersion());
+
+        MicroserviceVersionContainer microserviceVersionContainer = applicationContainer.getMicroserviceVersionContainer(serverMicroservice.getAppId(),serverMicroservice.getServiceName());
+        microserviceVersionContainer.getVersions().put(serverMicroservice.getVersion(), serverMicroservice);
+
+
+    }
+
 
     private static String generateServiceIndexKey(Microservice microservice){
         return  String.join("/", microservice.getEnvironment(), microservice.getAppId(), microservice.getServiceName(), microservice.getVersion());

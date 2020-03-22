@@ -3,17 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="efe3aa7d-b762-434a-8ce3-10f9d15c73b2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/MDNSServiceRegistryClientImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/MDNSServiceRegistryClientImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceInstanceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceInstanceService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ApplicationContainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ApplicationContainer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceContainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceContainer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceInstanceContainer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceVersionContainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceVersionContainer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroservice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroservice.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroserviceInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroserviceInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServiceFramework.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServiceType.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/util/RegisterUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/util/RegisterUtil.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -95,7 +88,7 @@
       <option name="presentableId" value="Default" />
       <updated>1584555215811</updated>
       <workItem from="1584555219353" duration="4077000" />
-      <workItem from="1584559356842" duration="85842000" />
+      <workItem from="1584559356842" duration="90360000" />
     </task>
     <servers />
   </component>

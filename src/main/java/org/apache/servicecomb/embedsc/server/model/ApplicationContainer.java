@@ -41,7 +41,6 @@ public class ApplicationContainer {
         return null;
     }
 
-
     public ServerMicroservice getOrCreateServerMicroservice(String appId, String serviceName, String version) {
         MicroserviceVersionContainer microserviceVersionContainer = getOrCreateMicroserviceVersionContainer(appId, serviceName);
         return microserviceVersionContainer.getOrCreateServerMicroservice(version);
