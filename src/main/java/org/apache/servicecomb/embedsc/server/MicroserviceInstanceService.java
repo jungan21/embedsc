@@ -14,23 +14,13 @@ import org.apache.servicecomb.serviceregistry.client.IpPortManager;
 import org.apache.servicecomb.serviceregistry.client.http.MicroserviceInstances;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.Name;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 
 public class MicroserviceInstanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroserviceInstanceService.class);
-
-    private IpPortManager ipPortManager;
-
-    public MicroserviceInstanceService(IpPortManager ipPortManager){
-        this.ipPortManager = ipPortManager;
-    }
-
 
     public String registerMicroserviceInstance(ServerMicroserviceInstance serverMicroserviceInstance) {
 //        try {

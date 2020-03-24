@@ -1,8 +1,10 @@
 package org.apache.servicecomb.embedsc.client;
 
+import net.posick.mDNS.MulticastDNSService;
+import net.posick.mDNS.ServiceInstance;
+import org.apache.servicecomb.embedsc.client.util.ClientRegisterUtil;
 import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
 import org.apache.servicecomb.embedsc.server.MicroserviceService;
-import org.apache.servicecomb.embedsc.util.RegisterUtil;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.*;
 import org.apache.servicecomb.serviceregistry.api.response.GetSchemaResponse;
@@ -17,21 +19,30 @@ import org.apache.servicecomb.serviceregistry.config.ServiceRegistryConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MDNSServiceRegistryClientImpl.class);
 
     private IpPortManager ipPortManager;
+    private MulticastDNSService multicastDNSService;
+
     private MicroserviceService microserviceService;
     private MicroserviceInstanceService microserviceInstanceService;
 
     public MDNSServiceRegistryClientImpl(ServiceRegistryConfig serviceRegistryConfig, InstanceCacheManager instanceCacheManager){
         this.ipPortManager = new IpPortManager(serviceRegistryConfig, instanceCacheManager);
-        this.microserviceService = new MicroserviceService(ipPortManager);
-        this.microserviceInstanceService = new  MicroserviceInstanceService(ipPortManager);
+        try {
+            this.multicastDNSService = new MulticastDNSService();
+        } catch (IOException e) {
+            LOGGER.error("Failed to create MulticastDNSService object", e);
+        }
+        this.microserviceService = new MicroserviceService();
+        this.microserviceInstanceService = new MicroserviceInstanceService();
     }
 
     @Override
@@ -46,12 +57,26 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public String getMicroserviceId(String appId, String microserviceName, String versionRule, String environment) {
-       return microserviceService.getMicroserviceId(appId, microserviceName, versionRule, environment);
+        return microserviceService.getMicroserviceId(appId, microserviceName, versionRule, environment);
     }
 
     @Override
     public String registerMicroservice(Microservice microservice) {
-        return microserviceService.registerMicroservice(RegisterUtil.convertToServerMicroservice(microservice));
+
+        // first time register Microservice, need to generate serviceId
+        String serviceId = microservice.getServiceId();
+        if (serviceId== null || serviceId.length() == 0){
+            serviceId = UUID.nameUUIDFromBytes(ClientRegisterUtil.generateServiceIndexKey(microservice).getBytes()).toString();
+        }
+
+        try {
+            ServiceInstance service =ClientRegisterUtil.convertMicroserviceToMDNSServiceInstance(serviceId, microservice, this.ipPortManager);
+            this.multicastDNSService.register(service);  // broadcast to MDNS
+            return serviceId;
+        } catch (IOException e) {
+            LOGGER.error("Failed to register microservice to mdns {}/{}/{}", microservice.getAppId(), microservice.getServiceName(), microservice.getVersion(), e);
+        }
+        return null;
     }
 
     @Override
@@ -96,7 +121,8 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public String registerMicroserviceInstance(MicroserviceInstance instance) {
-        return microserviceInstanceService.registerMicroserviceInstance(instance);
+        return null;
+        //return microserviceInstanceService.registerMicroserviceInstance(instance);
     }
 
     @Override

@@ -1,10 +1,9 @@
 package org.apache.servicecomb.embedsc.server.model;
 
-import org.apache.servicecomb.foundation.common.concurrent.ConcurrentHashMapEx;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -74,7 +73,7 @@ public class ServerMicroservice {
     private Map<String, String> schemaMap;
 
     // key:instanceId
-    private Map<String, ServerMicroserviceInstance> instances = new ConcurrentHashMapEx<>();
+    private Map<String, ServerMicroserviceInstance> instances = new ConcurrentHashMap<>();
 
     public ServerMicroservice() {
     }
@@ -101,7 +100,6 @@ public class ServerMicroservice {
 
     public void setAppId(String appId) {
         this.appId = appId;
-        this.serviceTextAttributesMap.put("appId", appId);
     }
 
     public String getServiceName() {
@@ -110,7 +108,6 @@ public class ServerMicroservice {
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
-        this.serviceTextAttributesMap.put("serviceName", serviceName);
     }
 
     public String getVersion() {
@@ -119,7 +116,6 @@ public class ServerMicroservice {
 
     public void setVersion(String version) {
         this.version = version;
-        this.serviceTextAttributesMap.put("version", version);
     }
 
     public String getServiceId() {
@@ -153,7 +149,6 @@ public class ServerMicroservice {
 
     public void setLevel(String level) {
         this.level = level;
-        this.serviceTextAttributesMap.put("level", level);
     }
 
     public List<String> getSchemas() {
@@ -162,7 +157,6 @@ public class ServerMicroservice {
 
     public void setSchemas(List<String> schemas) {
         this.schemas = schemas;
-        this.serviceTextAttributesMap.put("schemas", schemas.toString());
     }
 
     public String getStatus() {
@@ -171,7 +165,6 @@ public class ServerMicroservice {
 
     public void setStatus(String status) {
         this.status = status;
-        this.serviceTextAttributesMap.put("status", status);
     }
 
     public Map<String, String> getProperties() {
@@ -180,7 +173,6 @@ public class ServerMicroservice {
 
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
-        this.serviceTextAttributesMap.put("properties", properties.toString());
     }
 
     public String getTimestamp() {
@@ -189,7 +181,6 @@ public class ServerMicroservice {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
-        this.serviceTextAttributesMap.put("timestamp", timestamp);
     }
 
     public String getAlias() {
@@ -198,7 +189,6 @@ public class ServerMicroservice {
 
     public void setAlias(String alias) {
         this.alias = alias;
-        this.serviceTextAttributesMap.put("alias", alias);
     }
 
     public String getModTimestamp() {
@@ -207,7 +197,6 @@ public class ServerMicroservice {
 
     public void setModTimestamp(String modTimestamp) {
         this.modTimestamp = modTimestamp;
-        this.serviceTextAttributesMap.put("modTimestamp", modTimestamp);
     }
 
     public String getRegisterBy() {
@@ -216,7 +205,6 @@ public class ServerMicroservice {
 
     public void setRegisterBy(String registerBy) {
         this.registerBy = registerBy;
-        this.serviceTextAttributesMap.put("registerBy", registerBy);
     }
 
     public Map<String, String> getFramework() {
@@ -234,7 +222,6 @@ public class ServerMicroservice {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
-        this.serviceTextAttributesMap.put("environment", environment);
     }
 
     public Map<String, String> getSchemaMap() {
@@ -243,8 +230,6 @@ public class ServerMicroservice {
 
     public void setSchemaMap(Map<String, String> schemaMap) {
         this.schemaMap = schemaMap;
-        // as schemap is too big for UDP, we don't want to put it the serviceTextAttributesMap for one-time registration
-        //this.serviceTextAttributesMap.put("schemaMap", schemaMap.toString());
     }
 
     public String getDescription() {
@@ -253,7 +238,6 @@ public class ServerMicroservice {
 
     public void setDescription(String description) {
         this.description = description;
-        this.serviceTextAttributesMap.put("description", description);
     }
 
     public ServerMicroserviceInstance getOrCreateServerMicroserviceInstance(String instanceId) {

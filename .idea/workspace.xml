@@ -2,12 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="efe3aa7d-b762-434a-8ce3-10f9d15c73b2" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/util/ClientRegisterUtil.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/MDNSServiceRegistryClientImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/MDNSServiceRegistryClientImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceInstanceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceInstanceService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ApplicationContainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ApplicationContainer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceContainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceContainer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceVersionContainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/MicroserviceVersionContainer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroservice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroservice.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroserviceInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroserviceInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/util/RegisterUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/util/RegisterUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/util/RegisterUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/util/ServerRegisterUtil.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,6 +24,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
+        <option value="Enum" />
       </list>
     </option>
   </component>
@@ -41,28 +47,29 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.3506173" />
-    <property name="settings.editor.selected.configurable" value="reference.settings.project.maven.importing" />
+    <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.annotationProcessors" />
   </component>
   <component name="RecentsManager">
-    <key name="CreateClassDialog.RecentsKey">
-      <recent name="org.apache.servicecomb.embedsc.server.model1" />
-    </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="org.apache.servicecomb.embedsc" />
     </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\j00549873\Documents\workspace\java\embedsc\src\main\java\org\apache\servicecomb\embedsc\server\model" />
+    </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.apache.servicecomb.embedsc.server.listener" />
+      <recent name="org.apache.servicecomb.embedsc.client.util" />
       <recent name="org.apache.servicecomb.embedsc.server" />
       <recent name="org.apache.servicecomb.embedsc.server.model" />
       <recent name="org.apache.servicecomb.embedsc.model" />
-      <recent name="org.apache.servicecomb.embedsc.client" />
     </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\j00549873\Documents\workspace\java\embedsc\src\main\java\org\apache\servicecomb\embedsc\server\model" />
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="org.apache.servicecomb.embedsc.server.model1" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -88,7 +95,8 @@
       <option name="presentableId" value="Default" />
       <updated>1584555215811</updated>
       <workItem from="1584555219353" duration="4077000" />
-      <workItem from="1584559356842" duration="90360000" />
+      <workItem from="1584559356842" duration="100402000" />
+      <workItem from="1584974904740" duration="18719000" />
     </task>
     <servers />
   </component>
@@ -110,7 +118,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>

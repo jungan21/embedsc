@@ -3,9 +3,9 @@ package org.apache.servicecomb.embedsc.server.model;
 import org.apache.servicecomb.serviceregistry.api.registry.HealthCheck;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerMicroserviceInstance {
 
@@ -32,7 +32,11 @@ public class ServerMicroserviceInstance {
     private HealthCheck healthCheck;
 
     // key: client siede Microservice property/attribute
-    private Map<String, String> serviceInstanceTextAttributesMap = new HashMap<>();
+    private Map<String, String> serviceInstanceTextAttributesMap = new ConcurrentHashMap<>();
+
+    public ServerMicroserviceInstance(){
+
+    }
 
     public ServerMicroserviceInstance(String appId, String serviceName, String version, String instanceId) {
         this.appId = appId;

@@ -1,8 +1,7 @@
 package org.apache.servicecomb.embedsc.server.model;
 
-import org.apache.servicecomb.foundation.common.concurrent.ConcurrentHashMapEx;
-
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MicroserviceVersionContainer {
 
@@ -13,7 +12,7 @@ public class MicroserviceVersionContainer {
     private String serviceName;
 
     // Key: version
-    private Map<String, ServerMicroservice> versions = new ConcurrentHashMapEx<>();
+    private Map<String, ServerMicroservice> versions = new ConcurrentHashMap<>();
 
     public MicroserviceVersionContainer(ApplicationContainer applicationContainer, String appId, String serviceName) {
         this.applicationContainer = applicationContainer;
