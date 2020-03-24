@@ -2,7 +2,9 @@ package org.apache.servicecomb.embedsc.client.util;
 
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
+import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.foundation.common.net.IpPort;
+import org.apache.servicecomb.serviceregistry.api.registry.Framework;
 import org.apache.servicecomb.serviceregistry.api.registry.Microservice;
 import org.apache.servicecomb.serviceregistry.api.registry.MicroserviceInstance;
 import org.apache.servicecomb.serviceregistry.client.IpPortManager;
@@ -20,7 +22,7 @@ public class ClientRegisterUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRegisterUtil.class);
 
-    public static ServiceInstance convertMicroserviceToMDNSServiceInstance(String serviceId, Microservice microservice, IpPortManager ipPortManager) {
+    public static ServiceInstance convertToMDNSServiceInstance(String serviceId, Microservice microservice, IpPortManager ipPortManager) {
         try {
             ServiceName serviceName = new ServiceName(microservice.getServiceName()+ "._http._tcp.local.");
             IpPort ipPort = ipPortManager.getAvailableAddress();
@@ -49,10 +51,27 @@ public class ClientRegisterUtil {
             serviceTextAttributesMap.put("timestamp", timestamp);
             serviceTextAttributesMap.put("modTimestamp", timestamp);
 
-            // Map<schemaId, schemaContent> too big
+            // TODO: Map<schemaId, schemaContent> too big
             // serviceTextAttributesMap.put("schemaMap", microservice.getSchemaMap().toString());
 
+            MicroserviceInstance microserviceInstance = microservice.getInstance();
+            if (microserviceInstance != null) {
+                StringBuilder builder = new StringBuilder();
+                String microserviceInstanceString =  builder.append('{')
+                        .append("instanceId='").append(microserviceInstance.getInstanceId()).append('\'')
+                        .append(", serviceId='").append(microserviceInstance.getInstanceId()).append( '\'')
+                        .append(", endpoints=").append(microserviceInstance.getEndpoints()).append( '\'')
+                        .append( ", hostName='").append(microserviceInstance.getHostName()).append('\'')
+                        .append(", status=").append(microserviceInstance.getStatus()).append('\'')
+                        .append(", properties=").append( microserviceInstance.getProperties()).append('\'')
+                        .append(", timestamp='").append(microserviceInstance.getTimestamp()).append('\'')
+                        .append('}')
+                        .toString();
+                serviceTextAttributesMap.put("instance",  microserviceInstanceString);
+            }
+
             ServiceInstance service = new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), null, addresses, serviceTextAttributesMap);
+
             return service;
 
         } catch (TextParseException e) {
@@ -63,7 +82,7 @@ public class ClientRegisterUtil {
         return null;
     }
 
-    public static ServiceInstance convertMicroserviceInstanceToMDNSServiceInstance(String microserviceInstanceId, MicroserviceInstance microserviceInstance, IpPortManager ipPortManager) {
+    public static ServiceInstance convertToMDNSServiceInstance(String microserviceInstanceId, MicroserviceInstance microserviceInstance, IpPortManager ipPortManager) {
         try {
             ServiceName serviceName = new ServiceName(microserviceInstanceId + "._http._tcp.local.");
             IpPort ipPort = ipPortManager.getAvailableAddress();
@@ -91,42 +110,43 @@ public class ClientRegisterUtil {
         return null;
     }
 
-
     public static String generateServiceIndexKey(Microservice microservice){
         return  String.join("/", microservice.getEnvironment(), microservice.getAppId(), microservice.getServiceName(), microservice.getVersion());
     }
 
-    //    public static ServerMicroservice convertMicroserviceToServerMicroservice(Microservice microservice){
-//        ServerMicroservice serverMicroservice =  new ServerMicroservice();
-//
-//        // first time register Microservice, need to generate serviceId
-//        String serviceId = microservice.getServiceId();
-//        if (serviceId== null || serviceId.length() == 0){
-//            serviceId = UUID.nameUUIDFromBytes(generateServiceIndexKey(microservice).getBytes()).toString();
-//        }
-//
-//        serverMicroservice.setServiceId(serviceId);
-//        serverMicroservice.setAppId(microservice.getAppId());
-//        serverMicroservice.setServiceName(microservice.getServiceName());
-//        serverMicroservice.setVersion(microservice.getVersion());
-//        serverMicroservice.setLevel(microservice.getLevel());
-//        serverMicroservice.setAlias(microservice.getAlias());
-//        serverMicroservice.setSchemas(microservice.getSchemas());
-//        serverMicroservice.setStatus(microservice.getStatus());
-//        serverMicroservice.setRegisterBy(microservice.getRegisterBy());
-//        serverMicroservice.setEnvironment(microservice.getEnvironment());
-//        serverMicroservice.setProperties(microservice.getProperties());
-//        serverMicroservice.setDescription(microservice.getDescription());
-//
-//        // Framework object has name and value attributes
-//        Map<String, String> framework = new HashMap<>();
-//        framework.put("name", microservice.getFramework().getName());
-//        framework.put("version", microservice.getFramework().getVersion());
-//        serverMicroservice.setFramework(framework);
-//
-//        serverMicroservice.setSchemaMap(microservice.getSchemaMap());
-//
-//        return serverMicroservice;
-//    }
+    // convert retured server side object to client object
+    public static Microservice convertToClientMicroservice(ServerMicroservice serverMicroservice){
+        Microservice microservice =  new Microservice();
+
+        microservice.setServiceId(serverMicroservice.getServiceId());
+        microservice.setAppId(serverMicroservice.getAppId());
+        microservice.setServiceName(serverMicroservice.getServiceName());
+        microservice.setVersion(serverMicroservice.getVersion());
+        microservice.setLevel(serverMicroservice.getLevel());
+        microservice.setAlias(serverMicroservice.getAlias());
+        microservice.setSchemas(serverMicroservice.getSchemas());
+        microservice.setStatus(serverMicroservice.getStatus());
+        microservice.setRegisterBy(serverMicroservice.getRegisterBy());
+        microservice.setEnvironment(serverMicroservice.getEnvironment());
+        microservice.setProperties(serverMicroservice.getProperties());
+        microservice.setDescription(serverMicroservice.getDescription());
+
+        // Framework object has name and value attributes
+        Map<String, String> frameworkMap = serverMicroservice.getFramework();
+        if (frameworkMap != null && !frameworkMap.isEmpty()) {
+            Framework framework = new Framework();
+            framework.setName(frameworkMap.get("name"));
+            framework.setVersion(frameworkMap.get("version"));
+            microservice.setFramework(framework);
+        }
+
+        Map<String, String> schemaMap = microservice.getSchemaMap();
+        if (schemaMap != null && !schemaMap.isEmpty()){
+            for (Map.Entry<String, String> entry : schemaMap.entrySet())
+                microservice.addSchema(entry.getKey(), entry.getValue());
+        }
+
+        return microservice;
+    }
 
 }

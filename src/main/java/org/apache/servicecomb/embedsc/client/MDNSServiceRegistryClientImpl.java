@@ -5,6 +5,7 @@ import net.posick.mDNS.ServiceInstance;
 import org.apache.servicecomb.embedsc.client.util.ClientRegisterUtil;
 import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
 import org.apache.servicecomb.embedsc.server.MicroserviceService;
+import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.*;
 import org.apache.servicecomb.serviceregistry.api.response.GetSchemaResponse;
@@ -62,16 +63,16 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public String registerMicroservice(Microservice microservice) {
-
-        // first time register Microservice, need to generate serviceId
         String serviceId = microservice.getServiceId();
         if (serviceId== null || serviceId.length() == 0){
+            // generate serviceId based on the appId, serviceName and version
             serviceId = UUID.nameUUIDFromBytes(ClientRegisterUtil.generateServiceIndexKey(microservice).getBytes()).toString();
         }
 
         try {
-            ServiceInstance service =ClientRegisterUtil.convertMicroserviceToMDNSServiceInstance(serviceId, microservice, this.ipPortManager);
-            this.multicastDNSService.register(service);  // broadcast to MDNS
+            ServiceInstance service =ClientRegisterUtil.convertToMDNSServiceInstance(serviceId, microservice, this.ipPortManager);
+            // broadcast to MDNS
+            this.multicastDNSService.register(service);
             return serviceId;
         } catch (IOException e) {
             LOGGER.error("Failed to register microservice to mdns {}/{}/{}", microservice.getAppId(), microservice.getServiceName(), microservice.getVersion(), e);
@@ -81,7 +82,8 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public Microservice getMicroservice(String microserviceId) {
-        return microserviceService.getMicroservice(microserviceId);
+        ServerMicroservice serverMicroservice = microserviceService.getMicroservice(microserviceId);
+        return serverMicroservice != null ? ClientRegisterUtil.convertToClientMicroservice(serverMicroservice) : null;
     }
 
     @Override

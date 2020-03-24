@@ -143,6 +143,10 @@ public class ServerMicroservice {
         this.instances = instances;
     }
 
+    public void addInstance(ServerMicroserviceInstance instance) {
+       this.instances.put(instance.getServiceId(), instance);
+    }
+
     public String getLevel() {
         return level;
     }

@@ -1,16 +1,12 @@
 package org.apache.servicecomb.embedsc.server;
 
-import net.posick.mDNS.MulticastDNSService;
-import net.posick.mDNS.ServiceInstance;
-import net.posick.mDNS.ServiceName;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
-import org.apache.servicecomb.foundation.common.net.IpPort;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.MicroserviceInstance;
 import org.apache.servicecomb.serviceregistry.api.registry.ServiceCenterInfo;
 import org.apache.servicecomb.serviceregistry.api.response.HeartbeatResponse;
 import org.apache.servicecomb.serviceregistry.api.response.MicroserviceInstanceChangedEvent;
-import org.apache.servicecomb.serviceregistry.client.IpPortManager;
+
 import org.apache.servicecomb.serviceregistry.client.http.MicroserviceInstances;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
