@@ -1,5 +1,7 @@
 package org.apache.servicecomb.embedsc.client;
 
+import com.google.common.base.Charsets;
+import com.google.common.hash.Hashing;
 import net.posick.mDNS.MulticastDNSService;
 import net.posick.mDNS.ServiceInstance;
 import org.apache.servicecomb.embedsc.client.util.ClientRegisterUtil;
@@ -20,10 +22,11 @@ import org.apache.servicecomb.serviceregistry.config.ServiceRegistryConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
@@ -58,26 +61,26 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public String getMicroserviceId(String appId, String microserviceName, String versionRule, String environment) {
-        return microserviceService.getMicroserviceId(appId, microserviceName, versionRule, environment);
+        return microserviceService.getMicroserviceId(appId, microserviceName, versionRule);
     }
 
     @Override
     public String registerMicroservice(Microservice microservice) {
         String serviceId = microservice.getServiceId();
-        if (serviceId== null || serviceId.length() == 0){
-            // generate serviceId based on the appId, serviceName and version
-            serviceId = UUID.nameUUIDFromBytes(ClientRegisterUtil.generateServiceIndexKey(microservice).getBytes()).toString();
+        if (serviceId == null || serviceId.length() == 0){
+            // follow Go service center logic to generate serviceId based on the appId, serviceName and version
+            serviceId = ClientRegisterUtil.generateServiceId(microservice);
         }
 
         try {
-            ServiceInstance service =ClientRegisterUtil.convertToMDNSServiceInstance(serviceId, microservice, this.ipPortManager);
+            ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceInstance(serviceId, microservice, this.ipPortManager);
             // broadcast to MDNS
             this.multicastDNSService.register(service);
-            return serviceId;
         } catch (IOException e) {
             LOGGER.error("Failed to register microservice to mdns {}/{}/{}", microservice.getAppId(), microservice.getServiceName(), microservice.getVersion(), e);
+            return null;
         }
-        return null;
+        return serviceId;
     }
 
     @Override
@@ -103,12 +106,40 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public boolean registerSchema(String microserviceId, String schemaId, String schemaContent) {
-        return false;
+        Microservice microservice = this.getMicroservice(microserviceId);
+        if (microservice == null) {
+            LOGGER.error("Invalid serviceId! Failed to retrieve microservice for serviceId {}", microserviceId);
+            return false;
+        }
+
+        try {
+
+            // TODO:check schemaContent size if it's > 512 bytes (UDP limits), have to chunk the data
+            ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceInstance(microserviceId, schemaId, schemaContent, this.ipPortManager);
+            // broadcast to MDNS
+
+            this.multicastDNSService.register(service);
+        } catch (IOException e) {
+            LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS. The schema content is: {}",schemaId, microserviceId, schemaContent, e);
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String getSchema(String microserviceId, String schemaId) {
-        return null;
+        String schemaContent = null;
+        Microservice microservice = this.getMicroservice(microserviceId);
+        if (microservice == null) {
+            LOGGER.error("Invalid serviceId! Failed to retrieve microservice for serviceId {}", microserviceId);
+            return schemaContent;
+        }
+
+        Map<String, String> schemaMap = microservice.getSchemaMap();
+        if (schemaMap != null && !schemaMap.isEmpty()){
+            schemaContent = schemaMap.get(schemaId);
+        }
+        return schemaContent;
     }
 
     @Override
@@ -118,7 +149,22 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public Holder<List<GetSchemaResponse>> getSchemas(String microserviceId) {
-        return null;
+        // this method is called as part of the doRegister() method within MicroserviceRegisterTask.java
+        Microservice microservice = this.getMicroservice(microserviceId);
+        if (microservice == null) {
+            LOGGER.error("Invalid serviceId! Failed to retrieve microservice for serviceId {}", microserviceId);
+        }
+        List<GetSchemaResponse> schemas = new ArrayList<>();
+        microservice.getSchemaMap().forEach((key, val) -> {
+            GetSchemaResponse schema = new GetSchemaResponse();
+            schema.setSchema(val);
+            schema.setSchemaId(key);
+            schema.setSummary(Hashing.sha256().newHasher().putString(val, Charsets.UTF_8).hash().toString());
+            schemas.add(schema);
+        });
+        Holder<List<GetSchemaResponse>> resultHolder = new Holder<>();
+        resultHolder.setStatusCode(Response.Status.OK.getStatusCode()).setValue(schemas);
+        return resultHolder;
     }
 
     @Override

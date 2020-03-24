@@ -20,8 +20,8 @@ public class ServerRegisterUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerRegisterUtil.class);
 
     //Constants
-    public static  String[] discoverServiceTypes = new String[] {"_http._tcp."}; // "_http._tcp.": Web pages
-    public static String registerServiceType = "registerServiceType";
+    public static final String[] discoverServiceTypes = new String[] {"_http._tcp."}; // "_http._tcp.": Web pages
+    public static final String registerServiceType = "registerServiceType";
 
     // Microservice && MicroserviceInstance Container
     private static ApplicationContainer appContainer = new ApplicationContainer();
@@ -30,7 +30,7 @@ public class ServerRegisterUtil {
     private static Map<String, ServerMicroservice> serverMicroserviceMap = new ConcurrentHashMap<>();
 
     // 1st key: serviceId, 2nd key: instanceId
-    private static Map<String, Map<String, ServerMicroservice>>  serverMicroserviceInstanceMap = new ConcurrentHashMap<>();
+    private static Map<String, Map<String, ServerMicroserviceInstance>>  serverMicroserviceInstanceMap = new ConcurrentHashMap<>();
 
     public static ApplicationContainer getApplicationContainer() {
         return appContainer;
@@ -40,7 +40,7 @@ public class ServerRegisterUtil {
         return serverMicroserviceMap;
     }
 
-    public static Map<String, Map<String, ServerMicroservice>>  getServerMicroserviceInstanceMap() {
+    public static Map<String, Map<String, ServerMicroserviceInstance>>  getServerMicroserviceInstanceMap() {
         return serverMicroserviceInstanceMap;
     }
 
@@ -93,16 +93,27 @@ public class ServerRegisterUtil {
         return null;
     }
 
-    // TODO: build server side Mapping
-    public static void registerMicroserviceMapping(ServerMicroservice serverMicroservice) {
-        ApplicationContainer applicationContainer = ServerRegisterUtil.getApplicationContainer();
-        ServerMicroservice registeredServerMicroservice = applicationContainer.getOrCreateServerMicroservice(
-                serverMicroservice.getAppId(),
-                serverMicroservice.getServiceName(),
-                serverMicroservice.getVersion());
+    public static void buildMappingForMicroserviceRegistration(ServerMicroservice serverMicroservice) {
+        ApplicationContainer applicationContainer = getApplicationContainer();
 
-        MicroserviceVersionContainer microserviceVersionContainer = applicationContainer.getMicroserviceVersionContainer(serverMicroservice.getAppId(),serverMicroservice.getServiceName());
-        microserviceVersionContainer.getVersions().put(serverMicroservice.getVersion(), serverMicroservice);
+        MicroserviceVersionContainer microserviceVersionContainer = applicationContainer.getOrCreateMicroserviceVersionContainer(serverMicroservice.getAppId(), serverMicroservice.getServiceName());
+        if ( microserviceVersionContainer != null && microserviceVersionContainer.getVersions() != null){
+            microserviceVersionContainer.getVersions().put(serverMicroservice.getVersion(), serverMicroservice);
+        }
+
+        // TODO: ??? 这部分是不是放到buildMappingForMicroserviceInstanceRegistration里面？ build server side Mapping for ServerMicroservice object
+        // build the mapping for this serverMicroservice's instances
+//        Map<String, ServerMicroserviceInstance> instanceMap = serverMicroservice.getInstances();
+//
+//        if (instanceMap != null && !instanceMap.isEmpty()){
+//            ServerMicroservice returnedSrverMicroservice = applicationContainer.getOrCreateServerMicroservice(serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
+//            for (ServerMicroserviceInstance serverMicroserviceInstance : instanceMap.values()){
+//                if(returnedSrverMicroservice != null && returnedSrverMicroservice.getInstances() != null) {
+//                    returnedSrverMicroservice.addInstance(serverMicroserviceInstance);
+//                }
+//            }
+//        }
+
     }
 
     private static Map<String, String> convertMapStringToMap(String mapString){

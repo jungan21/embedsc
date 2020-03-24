@@ -2,6 +2,7 @@ package org.apache.servicecomb.embedsc.client.util;
 
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
+import org.apache.servicecomb.embedsc.server.model.RegisterServiceType;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.foundation.common.net.IpPort;
 import org.apache.servicecomb.serviceregistry.api.registry.Framework;
@@ -17,10 +18,13 @@ import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class ClientRegisterUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRegisterUtil.class);
+
+    public static final String registerServiceType = "registerServiceType";
 
     public static ServiceInstance convertToMDNSServiceInstance(String serviceId, Microservice microservice, IpPortManager ipPortManager) {
         try {
@@ -29,6 +33,7 @@ public class ClientRegisterUtil {
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
             Map<String, String> serviceTextAttributesMap = new HashMap<>();
+            serviceTextAttributesMap.put(registerServiceType, RegisterServiceType.MICROSERVICE.toString());
             serviceTextAttributesMap.put("appId", microservice.getAppId());
             serviceTextAttributesMap.put("serviceName", microservice.getServiceName());
             serviceTextAttributesMap.put("version", microservice.getVersion());
@@ -54,6 +59,7 @@ public class ClientRegisterUtil {
             // TODO: Map<schemaId, schemaContent> too big
             // serviceTextAttributesMap.put("schemaMap", microservice.getSchemaMap().toString());
 
+            // TODO: check, we may need to remove follow instance piece of code
             MicroserviceInstance microserviceInstance = microservice.getInstance();
             if (microserviceInstance != null) {
                 StringBuilder builder = new StringBuilder();
@@ -89,6 +95,7 @@ public class ClientRegisterUtil {
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
             Map<String, String> serviceInstanceTextAttributesMap = new HashMap<>();
+            serviceInstanceTextAttributesMap.put(registerServiceType, RegisterServiceType.MICROSERVICE_INSTANCE.toString());
             serviceInstanceTextAttributesMap.put("serviceId", microserviceInstance.getServiceId());
             serviceInstanceTextAttributesMap.put("status", microserviceInstance.getStatus().toString());
             serviceInstanceTextAttributesMap.put("environment", microserviceInstance.getEnvironment());
@@ -110,8 +117,39 @@ public class ClientRegisterUtil {
         return null;
     }
 
-    public static String generateServiceIndexKey(Microservice microservice){
-        return  String.join("/", microservice.getEnvironment(), microservice.getAppId(), microservice.getServiceName(), microservice.getVersion());
+    public static ServiceInstance convertToMDNSServiceInstance(String microserviceId, String schemaId, String schemaContent, IpPortManager ipPortManager) {
+
+        try {
+            ServiceName serviceName = new ServiceName(microserviceId + "_" + schemaId + "._http._tcp.local.");
+            IpPort ipPort = ipPortManager.getAvailableAddress();
+            InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
+
+            Map<String, String> serviceSchemaTextAttributesMap = new HashMap<>();
+            serviceSchemaTextAttributesMap.put(registerServiceType, RegisterServiceType.MICROSERVICE_SCHEMA.toString());
+            serviceSchemaTextAttributesMap.put("serviceId", microserviceId);
+            serviceSchemaTextAttributesMap.put("schemaId", schemaId);
+            serviceSchemaTextAttributesMap.put("schemaContent", schemaContent);
+
+            ServiceInstance microserviceServiceSchema = new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), null, addresses, serviceSchemaTextAttributesMap);
+            return microserviceServiceSchema;
+
+        } catch (TextParseException e) {
+            LOGGER.error("microservice has either invalid microserviceId {} OR invalid schemaId {}", microserviceId, schemaId, e);
+        } catch (UnknownHostException e1) {
+            LOGGER.error("microserviceId {} schema registration {} with Unknown Host name {}/", microserviceId, schemaId, ipPortManager.getAvailableAddress().getHostOrIp(), e1);
+        }
+        return null;
+    }
+
+    public static String generateServiceId(Microservice microservice){
+        String serviceIdStringIndex = String.join("/", microservice.getAppId(), microservice.getServiceName(), microservice.getVersion());
+        return UUID.nameUUIDFromBytes(serviceIdStringIndex.getBytes()).toString();
+    }
+
+    // TODO should be baesd on the both serviceId and schemaId
+    public static String generateServiceSchemaId(String serviceId, String schemaId){
+        String schemaIdStringIndex = String.join("/", serviceId, schemaId);
+        return UUID.nameUUIDFromBytes(schemaIdStringIndex.getBytes()).toString();
     }
 
     // convert retured server side object to client object
@@ -143,6 +181,7 @@ public class ClientRegisterUtil {
         Map<String, String> schemaMap = microservice.getSchemaMap();
         if (schemaMap != null && !schemaMap.isEmpty()){
             for (Map.Entry<String, String> entry : schemaMap.entrySet())
+                // fill out Map<schemaId, schemaContent> and List<schemaId>
                 microservice.addSchema(entry.getKey(), entry.getValue());
         }
 

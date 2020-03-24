@@ -26,26 +26,33 @@ public class ServiceCombMDSNServiceListener implements DNSSDListener {
 
     public void serviceDiscovered(Object id, ServiceInstance service) {
         LOGGER.debug("Microservice registered to MDNS, {}", service);
-        if(service != null) {
+
+        if(service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
             Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
-            if (serviceTextAttributesMap != null && !serviceTextAttributesMap.isEmpty()) {
-                String registerServiceType = serviceTextAttributesMap.get(ServerRegisterUtil.registerServiceType);
-                if (registerServiceType.equals(RegisterServiceType.MICROSERVICE)){
-                    microserviceService.registerMicroservice(service);
-                } else {
-                 //   microserviceInstanceService.registerMicroserviceInstance(service);
-                }
+            String registerServiceType = serviceTextAttributesMap.get(ServerRegisterUtil.registerServiceType);
+
+            if (registerServiceType.equals(RegisterServiceType.MICROSERVICE)){
+                microserviceService.registerMicroservice(service);
+            } else if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_INSTANCE)){
+                // TODO: microserviceInstanceService.registerMicroserviceInstance(service);
+            } else if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_SCHEMA)){
+                // TODO: register schema for microservice
+            } else {
+                LOGGER.error("Unrecognized service type {}", registerServiceType);
             }
         }
+
     }
 
+    // TODO
+    // two scenarios: 1. client explicitly call unregister 2. client service process is killed
     public void serviceRemoved(Object id, ServiceInstance service) {
         LOGGER.debug("Microservice unregistered from MDNS, {}", service);
-        // ignore as there is no unregister method for microservice s
+        // TODO: remove the service/serviceInstance from in-meory Map
     }
 
     public void handleException(Object id, Exception e) {
-        // ignore
+        LOGGER.error("Microservice register/unregister to/from MDNS exception", e);
     }
 
     public void receiveMessage(Object id, Message message) {
