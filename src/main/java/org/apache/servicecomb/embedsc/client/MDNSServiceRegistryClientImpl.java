@@ -114,7 +114,28 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
         try {
 
+
+            // from mdns source code
+//            NetworkProcessor.java
+//                    ===
+//            // Normally MTU size is 1500, but can be up to 9000 for jumbo frames.
+//            public static final int DEFAULT_MTU = 1500;
+//
+//            DatagramProcessor.java
+//                    ===
+//            // The default UDP datagram payload size
+//            protected int maxPayloadSize = 512;
+//
+//            // Determine maximum mDNS Payload size
+//
+//            maxPayloadSize = mtu (default 1500) - 40 /* IPv6 Header Size */- 8 /* UDP Header */;
+
+            // suggest
+
             // TODO:check schemaContent size if it's > 512 bytes (UDP limits), have to chunk the data
+            // TODO: Querier define default UDP size is 512
+            // https://tools.ietf.org/html/rfc6762#page-51 UTF-8 format
+            // https://tools.ietf.org/html/rfc6762#page-46  payload size ~1500 bytes DNS UDP: 512, MDNS UDP: 1500
             ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceInstance(microserviceId, schemaId, schemaContent, this.ipPortManager);
             // broadcast to MDNS
 
