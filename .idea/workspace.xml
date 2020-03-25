@@ -2,13 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="efe3aa7d-b762-434a-8ce3-10f9d15c73b2" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/util/JunTester.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/MDNSServiceRegistryClientImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/MDNSServiceRegistryClientImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/util/ClientRegisterUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/util/ClientRegisterUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/util/JunTester.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/util/JunTester.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceInstanceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceInstanceService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/listener/ServiceCombMDSNServiceListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/listener/ServiceCombMDSNServiceListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroservice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroservice.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroserviceInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroserviceInstance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/util/ServerRegisterUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/util/ServerRegisterUtil.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -132,7 +134,7 @@
       <updated>1584555215811</updated>
       <workItem from="1584555219353" duration="4077000" />
       <workItem from="1584559356842" duration="100402000" />
-      <workItem from="1584974904740" duration="71475000" />
+      <workItem from="1584974904740" duration="79375000" />
     </task>
     <servers />
   </component>

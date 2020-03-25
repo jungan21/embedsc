@@ -1,6 +1,9 @@
 package org.apache.servicecomb.embedsc.server;
 
+import net.posick.mDNS.ServiceInstance;
+import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
+import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.MicroserviceInstance;
 import org.apache.servicecomb.serviceregistry.api.registry.ServiceCenterInfo;
@@ -18,24 +21,23 @@ public class MicroserviceInstanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroserviceInstanceService.class);
 
-    public String registerMicroserviceInstance(ServerMicroserviceInstance serverMicroserviceInstance) {
-//        try {
-//            ServiceName serviceName = new ServiceName(serverMicroserviceInstance.getInstanceId() + "._http._tcp.local.");
-//            Name hostname = new Name(serverMicroserviceInstance.getHostName() + ".local.");
-//            IpPort ipPort = ipPortManager.getAvailableAddress();
-//            InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
-//            ServiceInstance serviceInstance = new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), hostname, addresses, "");
-//
-//            if (LOGGER.isDebugEnabled()) {
-//                LOGGER.debug("register microservice instance: {} to mdns", serviceInstance);
-//            }
-//
-//            ServiceInstance registeredService = new MulticastDNSService().register(serviceInstance);
-//            return instance.getInstanceId();
-//        } catch (IOException e) {
-//            LOGGER.error("register microservice instance to mdns {} failed", instance, e);
-//        }
-        return null;
+    public String registerMicroserviceInstance(ServiceInstance mdnsService) {
+        // convernt MDNS service format to our server side format: ServerMicroserviceInstance
+        ServerMicroserviceInstance serverMicroserviceInstance = ServerRegisterUtil.convertToServerMicroserviceInstance(mdnsService);
+        String microserviceId =  serverMicroserviceInstance.getServiceId();
+        LOGGER.info("register microservice instance : {}/{}/ to server side in-memory map", microserviceId, serverMicroserviceInstance.getInstanceId());
+
+        //for efficient query, we put ServerMicroservice into Map <serviceId, ServerMicroservice>, and create empty Map<instanceId, ServerMicroserviceInstance>
+        ServerMicroservice serverMicroservice = ServerRegisterUtil.getServerMicroserviceMap().get(microserviceId);
+        serverMicroservice.addInstance(serverMicroserviceInstance);
+        ServerRegisterUtil.getServerMicroserviceInstanceMap().get(serverMicroserviceInstance.getServiceId()).put(serverMicroserviceInstance.getInstanceId(), serverMicroserviceInstance);
+
+        // build in-memory mapping relationship for App, Service, Version, ServiceInstance
+        // need appId to build App -> Service -> Version -> Microservice -> Microservice Instance mapping
+        serverMicroserviceInstance.setAppId(serverMicroservice.getAppId());
+        ServerRegisterUtil.buildMappingForMicroserviceInstanceRegistration(serverMicroserviceInstance);
+
+        return serverMicroserviceInstance.getInstanceId();
     }
 
     public boolean unregisterMicroserviceInstance(String microserviceId, String microserviceInstanceId) {
@@ -71,7 +73,11 @@ public class MicroserviceInstanceService {
         return null;
     }
 
-    public MicroserviceInstance findServiceInstance(String serviceId, String instanceId) {
+    public ServerMicroserviceInstance findServiceInstance(String serviceId, String instanceId) {
+        Map<String, ServerMicroserviceInstance>  serverMicroserviceInstanceMap = ServerRegisterUtil.getServerMicroserviceInstanceMap().get(serviceId);
+        if (serverMicroserviceInstanceMap != null && !serverMicroserviceInstanceMap.isEmpty()){
+            return serverMicroserviceInstanceMap.get(instanceId);
+        }
         return null;
     }
 

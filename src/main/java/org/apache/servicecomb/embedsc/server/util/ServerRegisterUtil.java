@@ -2,10 +2,7 @@ package org.apache.servicecomb.embedsc.server.util;
 
 import net.posick.mDNS.ServiceInstance;
 
-import org.apache.servicecomb.embedsc.server.model.ApplicationContainer;
-import org.apache.servicecomb.embedsc.server.model.MicroserviceVersionContainer;
-import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
-import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
+import org.apache.servicecomb.embedsc.server.model.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,6 +112,17 @@ public class ServerRegisterUtil {
 //        }
 
     }
+
+    public static void buildMappingForMicroserviceInstanceRegistration(ServerMicroserviceInstance serverMicroserviceInstance) {
+        ApplicationContainer applicationContainer = getApplicationContainer();
+
+        ServerMicroservice serverMicroservice = applicationContainer.getOrCreateServerMicroservice(serverMicroserviceInstance.getAppId(), serverMicroserviceInstance.getServiceName(), serverMicroserviceInstance.getVersion());
+        if ( serverMicroservice != null && serverMicroservice.getInstances() != null){
+            serverMicroservice.getInstances().put(serverMicroserviceInstance.getInstanceId(), serverMicroserviceInstance);
+        }
+
+    }
+
 
     private static Map<String, String> convertMapStringToMap(String mapString){
         if(mapString != null && mapString.length() > 2){

@@ -8,6 +8,7 @@ import org.apache.servicecomb.embedsc.client.util.ClientRegisterUtil;
 import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
 import org.apache.servicecomb.embedsc.server.MicroserviceService;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
+import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.*;
 import org.apache.servicecomb.serviceregistry.api.response.GetSchemaResponse;
@@ -170,23 +171,23 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public String getSchema(String microserviceId, String schemaId) {
-        String schemaContent = null;
         Microservice microservice = this.getMicroservice(microserviceId);
         if (microservice == null) {
             LOGGER.error("Invalid serviceId! Failed to retrieve microservice for serviceId {}", microserviceId);
-            return schemaContent;
+            return null;
         }
 
         Map<String, String> schemaMap = microservice.getSchemaMap();
+
         if (schemaMap != null && !schemaMap.isEmpty()){
-            schemaContent = schemaMap.get(schemaId);
+            return schemaMap.get(schemaId);
         }
-        return schemaContent;
+        return null;
     }
 
     @Override
     public String getAggregatedSchema(String microserviceId, String schemaId) {
-        return null;
+        return this.getSchema(microserviceId, schemaId);
     }
 
     @Override
@@ -211,8 +212,25 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public String registerMicroserviceInstance(MicroserviceInstance instance) {
-        return null;
-        //return microserviceInstanceService.registerMicroserviceInstance(instance);
+
+        String serviceId = instance.getServiceId();
+        // allow client to set the instanceId
+        String instanceId = instance.getInstanceId();
+
+        if ( instanceId == null || instanceId.length() == 0){
+            // follow Go service center logic to generate serviceId based on the appId, serviceName and version
+            instanceId = ClientRegisterUtil.generateServiceInstanceId(instance);
+        }
+
+        try {
+            ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceInstance(serviceId, instanceId, instance, this.ipPortManager);
+            // broadcast to MDNS
+            this.multicastDNSService.register(service);
+        } catch (IOException e) {
+            LOGGER.error("Failed to register microservice instance to mdns. servcieId: {} instanceId:{}", serviceId, instanceId,  e);
+            return null;
+        }
+        return instanceId;
     }
 
     @Override
@@ -257,7 +275,14 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public MicroserviceInstance findServiceInstance(String serviceId, String instanceId) {
-        return null;
+        ServerMicroserviceInstance  serverMicroserviceInstance = this.microserviceInstanceService.findServiceInstance(serviceId, instanceId);
+        if (serverMicroserviceInstance == null) {
+            LOGGER.error("Invalid serviceId OR instanceId! Failed to retrieve Microservice Instance for serviceId {} and instanceId {}", serviceId, instanceId);
+            return null;
+        }
+
+        return serverMicroserviceInstance != null ? ClientRegisterUtil.convertToClientMicroserviceInstance(serverMicroserviceInstance) : null;
+
     }
 
     @Override

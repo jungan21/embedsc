@@ -75,15 +75,17 @@ public class MicroserviceService{
             Map<String, String> serviceSchemaTextAttributes = mdnsService.getTextAttributes();
 
             String totalChunkNumber = null;
+
             if (serviceSchemaTextAttributes != null && !serviceSchemaTextAttributes.isEmpty()){
                 totalChunkNumber = serviceSchemaTextAttributes.get("totalChunkNumber");
-                // indicate this a full schemaContent, otherwise, we have to join all schemaContentChunk together for build full schemaContent
+
+                // indicate this a full schemaContent (no split), otherwise, we have to join all schemaContentChunk together for build full schemaContent
                 if (totalChunkNumber == null){
                     String microserviceId = serviceSchemaTextAttributes.get("serviceId");
                     String schemaId = serviceSchemaTextAttributes.get("schemaId");
                     String schemaContent = serviceSchemaTextAttributes.get("schemaContent");
 
-                    // keep this copy is just for easier query
+                    // keep this copy for efficient querying microservice
                     ServerMicroservice serverMicroservice = this.getMicroservice(microserviceId);
                     serverMicroservice.addSchema(schemaId, schemaContent);
 
@@ -93,11 +95,10 @@ public class MicroserviceService{
 
                     return true;
                 } else {
-                    // find all schemaConentChunks for this <microserviceId, schemaId> and put them together
+                    // TODO find all schemaConentChunks for this <microserviceId, schemaId> and combine them together
 
                 }
             }
-
         }
 
         return false;

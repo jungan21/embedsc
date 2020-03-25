@@ -1,7 +1,5 @@
 package org.apache.servicecomb.embedsc.server.model;
 
-import org.apache.servicecomb.serviceregistry.api.registry.HealthCheck;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +27,9 @@ public class ServerMicroserviceInstance {
 
     private Map<String, String> properties;
 
-    private HealthCheck healthCheck;
+    private String timestamp;
+
+    private String modTimestamp;
 
     // key: client siede Microservice property/attribute
     private Map<String, String> serviceInstanceTextAttributesMap = new ConcurrentHashMap<>();
@@ -122,11 +122,19 @@ public class ServerMicroserviceInstance {
         this.properties = properties;
     }
 
-    public HealthCheck getHealthCheck() {
-        return healthCheck;
+    public String getTimestamp() {
+        return timestamp;
     }
 
-    public void setHealthCheck(HealthCheck healthCheck) {
-        this.healthCheck = healthCheck;
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getModTimestamp() {
+        return modTimestamp;
+    }
+
+    public void setModTimestamp(String modTimestamp) {
+        this.modTimestamp = modTimestamp;
     }
 }

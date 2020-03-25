@@ -10,7 +10,7 @@ public class JunTester {
 
     public static void main(String[] args) throws UnsupportedEncodingException, TextParseException {
         String s = "abcdefghijklmn";
-        
+
         ServiceName serviceName = new ServiceName("jun" + "_" + "gan" + "._http._tcp.local.");
 
         System.out.println(serviceName.toString());
