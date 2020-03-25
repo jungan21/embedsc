@@ -1,6 +1,5 @@
 package org.apache.servicecomb.embedsc.server.model;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,9 +67,9 @@ public class ServerMicroservice {
     private String environment;
 
     // key: client siede Microservice property/attribute
-    private Map<String, String> serviceTextAttributesMap = new HashMap<>();
+    private Map<String, String> serviceTextAttributesMap = new ConcurrentHashMap<>();
 
-    private Map<String, String> schemaMap;
+    private Map<String, String> schemaMap = new ConcurrentHashMap<>();
 
     // key:instanceId
     private Map<String, ServerMicroserviceInstance> instances = new ConcurrentHashMap<>();
@@ -234,6 +233,15 @@ public class ServerMicroservice {
 
     public void setSchemaMap(Map<String, String> schemaMap) {
         this.schemaMap = schemaMap;
+    }
+
+    public String getSchema(String schemaId) {
+        return schemaMap.get(schemaId);
+    }
+
+    public void addSchema(String schemaId, String schemaContent) {
+        this.schemaMap.put(schemaId, schemaContent);
+        this.schemas.add(schemaId);
     }
 
     public String getDescription() {

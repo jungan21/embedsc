@@ -16,15 +16,15 @@ import org.xbill.DNS.TextParseException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ClientRegisterUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRegisterUtil.class);
 
     public static final String registerServiceType = "registerServiceType";
+
+    public static final int SCHEMA_CONTENT_CHUNK_SIZE_IN_BYTE = 1200;
 
     public static ServiceInstance convertToMDNSServiceInstance(String serviceId, Microservice microservice, IpPortManager ipPortManager) {
         try {
@@ -117,14 +117,24 @@ public class ClientRegisterUtil {
         return null;
     }
 
-    public static ServiceInstance convertToMDNSServiceInstance(String microserviceId, String schemaId, String schemaContent, IpPortManager ipPortManager) {
+    public static ServiceInstance convertToMDNSServiceInstance(String microserviceId, String schemaId, Integer schemaChunkId, String schemaContent, Integer totalChunkNumber, IpPortManager ipPortManager) {
 
         try {
-            ServiceName serviceName = new ServiceName(microserviceId + "_" + schemaId + "._http._tcp.local.");
+            Map<String, String> serviceSchemaTextAttributesMap = new HashMap<>();
+
+            ServiceName serviceName = null;
+            if (schemaChunkId != null){
+                serviceSchemaTextAttributesMap.put("schemaChunkId", String.valueOf(schemaChunkId));
+            }
+
+            if (totalChunkNumber > 1){
+                serviceSchemaTextAttributesMap.put("totalChunkNumber", String.valueOf(totalChunkNumber));
+            }
+
             IpPort ipPort = ipPortManager.getAvailableAddress();
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
-            Map<String, String> serviceSchemaTextAttributesMap = new HashMap<>();
+            serviceName = new ServiceName(microserviceId + "_" + schemaId + "._http._tcp.local.");
             serviceSchemaTextAttributesMap.put(registerServiceType, RegisterServiceType.MICROSERVICE_SCHEMA.toString());
             serviceSchemaTextAttributesMap.put("serviceId", microserviceId);
             serviceSchemaTextAttributesMap.put("schemaId", schemaId);
@@ -186,6 +196,25 @@ public class ClientRegisterUtil {
         }
 
         return microservice;
+    }
+
+    public static List<String> splitschemaContentString (String schemaContentString, int chunkSize) {
+        int start = 0;
+        int end = chunkSize;
+        int length = schemaContentString.length();
+        List<String> subSchemaContentStringList = new ArrayList<>();
+        boolean isEnd = true;
+
+        while (isEnd){
+            if(start >= length){
+                end = length;
+                isEnd = false;
+            }
+            subSchemaContentStringList.add(schemaContentString.substring(start, end)) ;
+            start = end;
+            end = end + chunkSize;
+        }
+        return subSchemaContentStringList;
     }
 
 }

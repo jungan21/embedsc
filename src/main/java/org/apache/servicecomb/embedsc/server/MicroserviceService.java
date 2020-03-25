@@ -1,6 +1,7 @@
 package org.apache.servicecomb.embedsc.server;
 
 import net.posick.mDNS.ServiceInstance;
+import net.posick.mDNS.ServiceName;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
 import org.apache.servicecomb.serviceregistry.api.registry.Microservice;
@@ -65,7 +66,40 @@ public class MicroserviceService{
         return false;
     }
 
-    public boolean registerSchema(String microserviceId, String schemaId, String schemaContent) {
+    public boolean registerSchema(ServiceInstance mdnsService) {
+
+        ServiceName serviceName = mdnsService.getName();
+        if (serviceName != null && !serviceName.toString().isEmpty()){
+            //  sample serviceName for schema:  microserviceId_schemaId._http._tcp.local.
+            String mdnsServiceName = serviceName.toString().split("\\._")[0]; // microserviceId_schemaId
+            Map<String, String> serviceSchemaTextAttributes = mdnsService.getTextAttributes();
+
+            String totalChunkNumber = null;
+            if (serviceSchemaTextAttributes != null && !serviceSchemaTextAttributes.isEmpty()){
+                totalChunkNumber = serviceSchemaTextAttributes.get("totalChunkNumber");
+                // indicate this a full schemaContent, otherwise, we have to join all schemaContentChunk together for build full schemaContent
+                if (totalChunkNumber == null){
+                    String microserviceId = serviceSchemaTextAttributes.get("serviceId");
+                    String schemaId = serviceSchemaTextAttributes.get("schemaId");
+                    String schemaContent = serviceSchemaTextAttributes.get("schemaContent");
+
+                    // keep this copy is just for easier query
+                    ServerMicroservice serverMicroservice = this.getMicroservice(microserviceId);
+                    serverMicroservice.addSchema(schemaId, schemaContent);
+
+                    // keep track of the mapping relationship
+                    ServerMicroservice serverMicroserviceInContainer = ServerRegisterUtil.getApplicationContainer().getServerMicroservice(serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
+                    serverMicroserviceInContainer.addSchema(schemaId, schemaContent);
+
+                    return true;
+                } else {
+                    // find all schemaConentChunks for this <microserviceId, schemaId> and put them together
+
+                }
+            }
+
+        }
+
         return false;
     }
 
@@ -78,7 +112,6 @@ public class MicroserviceService{
     }
 
     public Holder<List<GetSchemaResponse>> getSchemas(String microserviceId) {
-
         return null;
     }
 

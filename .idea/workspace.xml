@@ -2,8 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="efe3aa7d-b762-434a-8ce3-10f9d15c73b2" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/util/JunTester.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/MDNSServiceRegistryClientImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/MDNSServiceRegistryClientImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/util/ClientRegisterUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/client/util/ClientRegisterUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/MicroserviceService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/listener/ServiceCombMDSNServiceListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/listener/ServiceCombMDSNServiceListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroservice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/apache/servicecomb/embedsc/server/model/ServerMicroservice.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,8 +19,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Enum" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -81,6 +86,40 @@
       </list>
     </option>
   </component>
+  <component name="RunManager" selected="Application.JunTester">
+    <configuration name="ClientRegisterUtil" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="org.apache.servicecomb.embedsc.client.util.ClientRegisterUtil" />
+      <module name="servicecomb-embeded-service-center" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.apache.servicecomb.embedsc.client.util.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="JunTester" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="org.apache.servicecomb.embedsc.client.util.JunTester" />
+      <module name="servicecomb-embeded-service-center" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.apache.servicecomb.embedsc.client.util.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.JunTester" />
+        <item itemvalue="Application.ClientRegisterUtil" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -93,7 +132,7 @@
       <updated>1584555215811</updated>
       <workItem from="1584555219353" duration="4077000" />
       <workItem from="1584559356842" duration="100402000" />
-      <workItem from="1584974904740" duration="50646000" />
+      <workItem from="1584974904740" duration="71475000" />
     </task>
     <servers />
   </component>

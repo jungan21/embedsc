@@ -36,7 +36,7 @@ public class ServiceCombMDSNServiceListener implements DNSSDListener {
             } else if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_INSTANCE)){
                 // TODO: microserviceInstanceService.registerMicroserviceInstance(service);
             } else if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_SCHEMA)){
-                // TODO: register schema for microservice
+                microserviceService.registerSchema(service);
             } else {
                 LOGGER.error("Unrecognized service type {}", registerServiceType);
             }

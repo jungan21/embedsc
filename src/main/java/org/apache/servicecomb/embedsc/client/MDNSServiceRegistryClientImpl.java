@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -107,42 +108,62 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
     @Override
     public boolean registerSchema(String microserviceId, String schemaId, String schemaContent) {
         Microservice microservice = this.getMicroservice(microserviceId);
-        if (microservice == null) {
-            LOGGER.error("Invalid serviceId! Failed to retrieve microservice for serviceId {}", microserviceId);
+        if (microservice == null){
+            LOGGER.error("Invalid serviceId! Failed to retrieve Microservice for serviceId {}", microserviceId);
             return false;
         }
 
-        try {
+        byte[] schemaContentBytes = null;
+        if(schemaContent != null && !schemaContent.isEmpty()){
+            try {
+                schemaContentBytes = schemaContent.getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS as schemaContent has unsupported endocing: {}",schemaId, microserviceId, schemaContent, e);
+                return false;
+            }
+        }
 
-
-            // from mdns source code
-//            NetworkProcessor.java
-//                    ===
-//            // Normally MTU size is 1500, but can be up to 9000 for jumbo frames.
-//            public static final int DEFAULT_MTU = 1500;
-//
-//            DatagramProcessor.java
-//                    ===
-//            // The default UDP datagram payload size
-//            protected int maxPayloadSize = 512;
-//
-//            // Determine maximum mDNS Payload size
-//
-//            maxPayloadSize = mtu (default 1500) - 40 /* IPv6 Header Size */- 8 /* UDP Header */;
-
-            // suggest
-
-            // TODO:check schemaContent size if it's > 512 bytes (UDP limits), have to chunk the data
-            // TODO: Querier define default UDP size is 512
-            // https://tools.ietf.org/html/rfc6762#page-51 UTF-8 format
-            // https://tools.ietf.org/html/rfc6762#page-46  payload size ~1500 bytes DNS UDP: 512, MDNS UDP: 1500
-            ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceInstance(microserviceId, schemaId, schemaContent, this.ipPortManager);
+        if ( schemaContentBytes != null && schemaContentBytes.length  <= ClientRegisterUtil.SCHEMA_CONTENT_CHUNK_SIZE_IN_BYTE){
+            // schemaContent size is <= 1200 Bytes
+            ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceInstance(microserviceId, schemaId, null, schemaContent, 1, this.ipPortManager);
             // broadcast to MDNS
+            try {
+                this.multicastDNSService.register(service);
+            }  catch (IOException e) {
+                LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS. The schema content is: {}",schemaId, microserviceId, schemaContent, e);
+                return false;
+            }
+            return true;
 
-            this.multicastDNSService.register(service);
-        } catch (IOException e) {
-            LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS. The schema content is: {}",schemaId, microserviceId, schemaContent, e);
-            return false;
+        } else {
+            // schemaContent size is > 1200 Bytes. need to split schemaContent
+
+            /**
+             *  RFC: https://tools.ietf.org/html/rfc6762#page-51 UTF-8 format && https://tools.ietf.org/html/rfc6762#page-46  payload size ~1500 bytes DNS UDP: 512, MDNS UDP: 1500
+             *
+             * mdns lib:
+             *      NetworkProcessor.java Normally MTU size is 1500, but can be up to 9000 for jumbo frames. DEFAULT_MTU = 1500
+             *      DatagramProcessor.java  Determine maximum mDNS Payload size maxPayloadSize = mtu (default 1500) - 40 ( IPv6 Header Size )- 8 (UDP Header)
+             */
+            List<String> schemaContentStringList = ClientRegisterUtil.splitschemaContentString(schemaContent, ClientRegisterUtil.SCHEMA_CONTENT_CHUNK_SIZE_IN_BYTE);
+            return this.registerSchemaChunks(microserviceId, schemaId, schemaContentStringList);
+        }
+
+    }
+
+    private boolean registerSchemaChunks(String microserviceId, String schemaId, List<String> schemaContentStringList){
+
+        int schemaContentChunkId = 0;
+        int totalChunkNumber = schemaContentStringList.size();
+        for (String schemaChunkContent : schemaContentStringList){
+            ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceInstance(microserviceId, schemaId, schemaContentChunkId, schemaChunkContent, totalChunkNumber, this.ipPortManager);
+            try {
+                this.multicastDNSService.register(service);
+            }  catch (IOException e) {
+                LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS. The schema content is: {}",schemaId, microserviceId, schemaChunkContent, e);
+                return false;
+            }
+            schemaContentChunkId++;
         }
         return true;
     }
