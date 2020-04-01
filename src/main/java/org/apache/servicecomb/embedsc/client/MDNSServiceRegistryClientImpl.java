@@ -262,7 +262,18 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public boolean updateInstanceProperties(String microserviceId, String microserviceInstanceId, Map<String, String> instanceProperties) {
-        return false;
+        MicroserviceInstance microserviceInstance = this.findServiceInstance(microserviceId, microserviceInstanceId);
+        if(microserviceInstance == null) {
+            LOGGER.error("Invalid microserviceId, microserviceId: {} OR microserviceInstanceId, microserviceInstanceId: {}", microserviceId, microserviceInstanceId);
+            return false;
+        }
+
+        // putAll will update values for keys exist in the map, also add new <key, value> to the map
+        microserviceInstance.getProperties().putAll(instanceProperties);
+
+        String serviceInstanceId = this.registerMicroserviceInstance(microserviceInstance);
+
+        return (serviceInstanceId != null && !serviceInstanceId.isEmpty()) ? true : false;
     }
 
     @Override

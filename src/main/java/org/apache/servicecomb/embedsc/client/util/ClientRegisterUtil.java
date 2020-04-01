@@ -144,6 +144,7 @@ public class ClientRegisterUtil {
             Map<String, String> serviceInstanceTextAttributesMap = new HashMap<>();
             serviceInstanceTextAttributesMap.put(registerServiceType, RegisterServiceType.MICROSERVICE_INSTANCE.toString());
             serviceInstanceTextAttributesMap.put("serviceId", serviceId);
+            serviceInstanceTextAttributesMap.put("instanceId", microserviceInstanceId);
             serviceInstanceTextAttributesMap.put("status", microserviceInstance.getStatus().toString());
             serviceInstanceTextAttributesMap.put("environment", microserviceInstance.getEnvironment());
             serviceInstanceTextAttributesMap.put("properties", microserviceInstance.getProperties().toString());
@@ -152,6 +153,7 @@ public class ClientRegisterUtil {
             String hostName = microserviceInstance.getHostName();
             serviceInstanceTextAttributesMap.put("hostName", hostName);
             Name mdnsHostName = new Name(hostName +".local.");
+
 
             return new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), mdnsHostName, addresses, serviceInstanceTextAttributesMap);
 

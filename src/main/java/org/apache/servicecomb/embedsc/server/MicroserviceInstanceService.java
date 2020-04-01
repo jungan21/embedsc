@@ -23,21 +23,43 @@ public class MicroserviceInstanceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroserviceInstanceService.class);
 
     public String registerMicroserviceInstance(ServiceInstance mdnsService) {
-        // convernt MDNS service instance format to our server side format: ServerMicroserviceInstance
-        ServerMicroserviceInstance serverMicroserviceInstance = ServerRegisterUtil.convertToServerMicroserviceInstance(mdnsService);
-        String microserviceId =  serverMicroserviceInstance.getServiceId();
-        LOGGER.info("register microservice instance : {}/{}/ to server side in-memory map", microserviceId, serverMicroserviceInstance.getInstanceId());
+        //  ServiceName serviceName = new ServiceName(microserviceInstanceId + "._http._tcp.local.");
+        String serviceId = null;
+        String instanceId = null;
 
-        //for easy query: updaate serverMicroservice instance property and also put ServerMicroserviceInstance into Map<instanceId, ServerMicroserviceInstance>
-        ServerMicroservice serverMicroservice = ServerRegisterUtil.getServerMicroserviceMap().get(microserviceId);
-        serverMicroservice.addInstance(serverMicroserviceInstance);
-        ServerRegisterUtil.getServerMicroserviceInstanceMap().get(serverMicroserviceInstance.getServiceId()).put(serverMicroserviceInstance.getInstanceId(), serverMicroserviceInstance);
 
-        // build mapping for App, Service, Version, ServiceInstance. need appId to build App -> Service -> Version -> Microservice -> Microservice Instance mapping
-        serverMicroserviceInstance.setAppId(serverMicroservice.getAppId());
-        ServerRegisterUtil.buildMappingForMicroserviceInstanceRegistration(serverMicroserviceInstance);
+        if (mdnsService != null && mdnsService.getTextAttributes() != null) {
+            serviceId = (String) mdnsService.getTextAttributes().get("serviceId");
+            instanceId = (String) mdnsService.getTextAttributes().get("instanceId");
 
-        return serverMicroserviceInstance.getInstanceId();
+            // need to check if this id already exists in server side
+            ServerMicroserviceInstance serverMicroserviceInstance = ServerRegisterUtil.getServerMicroserviceInstanceMap().get(serviceId).get(instanceId);
+
+            // update existing service instance properties
+            if (serverMicroserviceInstance != null){
+                Map<String, String> newPropertiesMap = ServerRegisterUtil.convertMapStringToMap((String)mdnsService.getTextAttributes().get("properties"));
+                serverMicroserviceInstance.getProperties().putAll(newPropertiesMap);
+                ServerRegisterUtil.buildMappingForMicroserviceInstanceRegistration(serverMicroserviceInstance);
+            } else {
+                // register new service instance
+                // convernt MDNS service instance format to our server side format: ServerMicroserviceInstance
+                ServerMicroserviceInstance newServerMicroserviceInstance = ServerRegisterUtil.convertToServerMicroserviceInstance(mdnsService);
+                serviceId =  newServerMicroserviceInstance.getServiceId();
+                LOGGER.info("register microservice instance : {}/{}/ to server side in-memory map", serviceId, newServerMicroserviceInstance.getInstanceId());
+
+                //for easy query: updaate serverMicroservice instance property and also put ServerMicroserviceInstance into Map<instanceId, ServerMicroserviceInstance>
+                ServerMicroservice serverMicroservice = ServerRegisterUtil.getServerMicroserviceMap().get(serviceId);
+                serverMicroservice.addInstance(newServerMicroserviceInstance);
+                ServerRegisterUtil.getServerMicroserviceInstanceMap().get(newServerMicroserviceInstance.getServiceId()).put(newServerMicroserviceInstance.getInstanceId(), newServerMicroserviceInstance);
+
+                // build mapping for App, Service, Version, ServiceInstance. need appId to build App -> Service -> Version -> Microservice -> Microservice Instance mapping
+                newServerMicroserviceInstance.setAppId(serverMicroservice.getAppId());
+                ServerRegisterUtil.buildMappingForMicroserviceInstanceRegistration(newServerMicroserviceInstance);
+
+            }
+        }
+
+        return instanceId;
     }
 
     public boolean unregisterMicroserviceInstance(String microserviceId, String microserviceInstanceId) {
