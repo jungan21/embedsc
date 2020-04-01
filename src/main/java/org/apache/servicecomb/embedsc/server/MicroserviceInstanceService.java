@@ -27,7 +27,6 @@ public class MicroserviceInstanceService {
         String serviceId = null;
         String instanceId = null;
 
-
         if (mdnsService != null && mdnsService.getTextAttributes() != null) {
             serviceId = (String) mdnsService.getTextAttributes().get("serviceId");
             instanceId = (String) mdnsService.getTextAttributes().get("instanceId");
@@ -39,6 +38,7 @@ public class MicroserviceInstanceService {
             if (serverMicroserviceInstance != null){
                 Map<String, String> newPropertiesMap = ServerRegisterUtil.convertMapStringToMap((String)mdnsService.getTextAttributes().get("properties"));
                 serverMicroserviceInstance.getProperties().putAll(newPropertiesMap);
+                serverMicroserviceInstance.setStatus((String)mdnsService.getTextAttributes().get("status"));
                 ServerRegisterUtil.buildMappingForMicroserviceInstanceRegistration(serverMicroserviceInstance);
             } else {
                 // register new service instance
@@ -112,10 +112,7 @@ public class MicroserviceInstanceService {
 
     public ServerMicroserviceInstance findServiceInstance(String serviceId, String instanceId) {
         Map<String, ServerMicroserviceInstance>  serverMicroserviceInstanceMap = ServerRegisterUtil.getServerMicroserviceInstanceMap().get(serviceId);
-        if (serverMicroserviceInstanceMap != null && !serverMicroserviceInstanceMap.isEmpty()){
-            return serverMicroserviceInstanceMap.get(instanceId);
-        }
-        return null;
+        return (serverMicroserviceInstanceMap != null && !serverMicroserviceInstanceMap.isEmpty()) ? serverMicroserviceInstanceMap.get(instanceId) : null;
     }
 
     public ServiceCenterInfo getServiceCenterInfo() {

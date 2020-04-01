@@ -15,7 +15,6 @@ import org.apache.servicecomb.serviceregistry.api.registry.*;
 import org.apache.servicecomb.serviceregistry.api.response.GetSchemaResponse;
 import org.apache.servicecomb.serviceregistry.api.response.HeartbeatResponse;
 import org.apache.servicecomb.serviceregistry.api.response.MicroserviceInstanceChangedEvent;
-import org.apache.servicecomb.serviceregistry.cache.InstanceCacheManager;
 import org.apache.servicecomb.serviceregistry.client.IpPortManager;
 import org.apache.servicecomb.serviceregistry.client.ServiceRegistryClient;
 import org.apache.servicecomb.serviceregistry.client.http.Holder;
@@ -41,8 +40,8 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
     private MicroserviceService microserviceService;
     private MicroserviceInstanceService microserviceInstanceService;
 
-    public MDNSServiceRegistryClientImpl(ServiceRegistryConfig serviceRegistryConfig, InstanceCacheManager instanceCacheManager){
-        this.ipPortManager = new IpPortManager(serviceRegistryConfig, instanceCacheManager);
+    public MDNSServiceRegistryClientImpl(ServiceRegistryConfig serviceRegistryConfig){
+        this.ipPortManager = new IpPortManager(serviceRegistryConfig);
         try {
             this.multicastDNSService = new MulticastDNSService();
         } catch (IOException e) {
@@ -268,6 +267,10 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
             return false;
         }
 
+        if(  microserviceInstance.getProperties().equals(instanceProperties)) {
+            throw new IllegalArgumentException("No update to existing instance properties" +  instanceProperties);
+        }
+
         // putAll will update values for keys exist in the map, also add new <key, value> to the map
         microserviceInstance.getProperties().putAll(instanceProperties);
 
@@ -299,11 +302,13 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
         return false;
     }
 
+    // TODO ???
     @Override
     public HeartbeatResponse heartbeat(String microserviceId, String microserviceInstanceId) {
         return null;
     }
 
+    // TODO ???
     @Override
     public void watch(String selfMicroserviceId, AsyncResultCallback<MicroserviceInstanceChangedEvent> callback) {
 
@@ -331,9 +336,7 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
             LOGGER.error("Invalid serviceId OR instanceId! Failed to retrieve Microservice Instance for serviceId {} and instanceId {}", serviceId, instanceId);
             return null;
         }
-
-        return serverMicroserviceInstance != null ? ClientRegisterUtil.convertToClientMicroserviceInstance(serverMicroserviceInstance) : null;
-
+        return ClientRegisterUtil.convertToClientMicroserviceInstance(serverMicroserviceInstance);
     }
 
     @Override
@@ -348,8 +351,25 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
     }
 
     @Override
-    public boolean undateMicroserviceInstanceStatus(String microserviceId, String microserviceInstanceId, String status) {
-        return false;
+    public boolean updateMicroserviceInstanceStatus(String microserviceId, String instanceId, MicroserviceInstanceStatus status) {
+        if (null == status) {
+            throw new IllegalArgumentException("null status is now allowed");
+        }
+
+        MicroserviceInstance microserviceInstance = this.findServiceInstance(microserviceId, instanceId);
+
+        if(microserviceInstance == null) {
+            throw new IllegalArgumentException("Invalid microserviceId=" +  microserviceId + "OR instanceId=" + instanceId);
+        }
+
+        if ( status.equals(microserviceInstance.getStatus().toString())){
+            throw new IllegalArgumentException("service instance status is same as server side existing status: " +  microserviceInstance.getStatus().toString());
+        }
+
+        LOGGER.debug("update status of microservice instance: {}", status);
+        microserviceInstance.setStatus(status);
+        String serviceInstanceId = this.registerMicroserviceInstance(microserviceInstance);
+        return (serviceInstanceId != null && !serviceInstanceId.isEmpty()) ? true : false;
     }
 
 }
