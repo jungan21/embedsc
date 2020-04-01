@@ -146,6 +146,10 @@ public class ServerMicroservice {
        this.instances.put(instance.getServiceId(), instance);
     }
 
+    public void removeInstance(String microserviceInstanceId) {
+        this.instances.remove(microserviceInstanceId);
+    }
+
     public String getLevel() {
         return level;
     }

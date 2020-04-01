@@ -25,7 +25,7 @@ public class ServiceCombMDSNServiceListener implements DNSSDListener {
     }
 
     public void serviceDiscovered(Object id, ServiceInstance service) {
-        LOGGER.debug("Microservice registered to MDNS, {}", service);
+        LOGGER.debug("Microservice registered to MDNS server {}", service);
 
         if(service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
             Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
@@ -38,16 +38,25 @@ public class ServiceCombMDSNServiceListener implements DNSSDListener {
             } else if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_SCHEMA)){
                 microserviceService.registerSchema(service);
             } else {
-                LOGGER.error("Unrecognized service type {}", registerServiceType);
+                LOGGER.error("Unrecognized service type {} when during registration", registerServiceType);
             }
         }
     }
 
-    // TODO
     // two scenarios: 1. client explicitly call unregister 2. client service process is killed
     public void serviceRemoved(Object id, ServiceInstance service) {
-        LOGGER.debug("Microservice unregistered from MDNS, {}", service);
-        // TODO: remove the service/serviceInstance from in-meory Map
+        LOGGER.debug("Microservice unregistered from MDNS server {}", service);
+
+        if(service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
+            Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
+            String registerServiceType = serviceTextAttributesMap.get(ServerRegisterUtil.registerServiceType);
+
+            if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_INSTANCE)){
+                microserviceInstanceService.unregisterMicroserviceInstance(serviceTextAttributesMap.get("serviceId"), serviceTextAttributesMap.get("instanceId"));
+            } else {
+                LOGGER.error("Unrecognized service type {} during unregistration", registerServiceType);
+            }
+        }
     }
 
     public void handleException(Object id, Exception e) {

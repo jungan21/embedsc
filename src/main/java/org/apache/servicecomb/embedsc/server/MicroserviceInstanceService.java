@@ -1,6 +1,7 @@
 package org.apache.servicecomb.embedsc.server;
 
 import net.posick.mDNS.ServiceInstance;
+import org.apache.servicecomb.embedsc.server.model.ApplicationContainer;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
@@ -22,18 +23,17 @@ public class MicroserviceInstanceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroserviceInstanceService.class);
 
     public String registerMicroserviceInstance(ServiceInstance mdnsService) {
-        // convernt MDNS service format to our server side format: ServerMicroserviceInstance
+        // convernt MDNS service instance format to our server side format: ServerMicroserviceInstance
         ServerMicroserviceInstance serverMicroserviceInstance = ServerRegisterUtil.convertToServerMicroserviceInstance(mdnsService);
         String microserviceId =  serverMicroserviceInstance.getServiceId();
         LOGGER.info("register microservice instance : {}/{}/ to server side in-memory map", microserviceId, serverMicroserviceInstance.getInstanceId());
 
-        //for efficient query, we put ServerMicroservice into Map <serviceId, ServerMicroservice>, and create empty Map<instanceId, ServerMicroserviceInstance>
+        //for easy query: updaate serverMicroservice instance property and also put ServerMicroserviceInstance into Map<instanceId, ServerMicroserviceInstance>
         ServerMicroservice serverMicroservice = ServerRegisterUtil.getServerMicroserviceMap().get(microserviceId);
         serverMicroservice.addInstance(serverMicroserviceInstance);
         ServerRegisterUtil.getServerMicroserviceInstanceMap().get(serverMicroserviceInstance.getServiceId()).put(serverMicroserviceInstance.getInstanceId(), serverMicroserviceInstance);
 
-        // build in-memory mapping relationship for App, Service, Version, ServiceInstance
-        // need appId to build App -> Service -> Version -> Microservice -> Microservice Instance mapping
+        // build mapping for App, Service, Version, ServiceInstance. need appId to build App -> Service -> Version -> Microservice -> Microservice Instance mapping
         serverMicroserviceInstance.setAppId(serverMicroservice.getAppId());
         ServerRegisterUtil.buildMappingForMicroserviceInstanceRegistration(serverMicroserviceInstance);
 
@@ -41,7 +41,22 @@ public class MicroserviceInstanceService {
     }
 
     public boolean unregisterMicroserviceInstance(String microserviceId, String microserviceInstanceId) {
-        return false;
+
+        // delete it from  map
+        ServerMicroservice serverMicroservice = ServerRegisterUtil.getServerMicroserviceMap().get(microserviceId);
+        if (serverMicroservice != null && serverMicroservice.getInstances() != null){
+            serverMicroservice.removeInstance(microserviceInstanceId);
+        }
+        ServerRegisterUtil.getServerMicroserviceInstanceMap().get(microserviceId).remove(microserviceInstanceId);
+
+        // delete it from mapping container
+        ApplicationContainer applicationContainer = ServerRegisterUtil.getApplicationContainer();
+        ServerMicroservice serverMicroserviceInMapping = applicationContainer.getServerMicroservice(serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
+        Map<String, ServerMicroserviceInstance> instancesMap =  serverMicroserviceInMapping.getInstances();
+        if(instancesMap != null && instancesMap.containsKey(microserviceInstanceId)){
+            instancesMap.remove(microserviceInstanceId);
+        }
+        return true;
     }
 
     public List<MicroserviceInstance> getMicroserviceInstance(String consumerId, String providerId) {

@@ -42,14 +42,14 @@ public class ServerRegisterUtil {
     }
 
     public static ServerMicroservice convertToServerMicroservice(ServiceInstance service){
-
+        
         Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
 
         if (serviceTextAttributesMap != null && !serviceTextAttributesMap.isEmpty()){
             ServerMicroservice serverMicroservice =  new ServerMicroservice();
             serverMicroservice.setServiceId(serviceTextAttributesMap.get("serviceId"));
             serverMicroservice.setAppId(serviceTextAttributesMap.get("appId"));
-            serverMicroservice.setServiceName(serviceTextAttributesMap.get("ServiceName"));
+            serverMicroservice.setServiceName(serviceTextAttributesMap.get("serviceName"));
             serverMicroservice.setLevel(serviceTextAttributesMap.get("level"));
             serverMicroservice.setAlias(serviceTextAttributesMap.get("alias"));
             serverMicroservice.setVersion(serviceTextAttributesMap.get("version"));
@@ -60,11 +60,7 @@ public class ServerRegisterUtil {
             serverMicroservice.setEnvironment(serviceTextAttributesMap.get("environment"));
             serverMicroservice.setDescription(serviceTextAttributesMap.get("description"));
 
-            // extract instance object
-            String instanceString = serviceTextAttributesMap.get("instance");
-            serverMicroservice.addInstance(buildServerMicroserviceInstanceFromMapString(instanceString));
-
-            // ["schema1", "schema2"]
+            // ["schema1", "schema2"] just schema name list
             String schemaString = serviceTextAttributesMap.get("schemas");
             if (schemaString != null && schemaString.length() > 2) {
                 serverMicroservice.setSchemas(Arrays.asList(schemaString.substring(1, schemaString.length() - 1).split(",")));
@@ -73,8 +69,20 @@ public class ServerRegisterUtil {
             // framework,  properties and schemaMap are Map type
             serverMicroservice.setFramework(convertMapStringToMap(serviceTextAttributesMap.get("framework")));
             serverMicroservice.setProperties(convertMapStringToMap(serviceTextAttributesMap.get("properties")));
-            // schemaMap Map<String, String> Map<schemaId, content>
-            serverMicroservice.setSchemaMap(convertMapStringToMap(serviceTextAttributesMap.get("schemaMap")));
+
+            /**
+             *
+             * NOTE: because the schemaMap is NOT set when registering for Micrservice
+             *  schemaMap Map<String, String> Map<schemaId, content>
+             *  serverMicroservice.setSchemaMap(convertMapStringToMap(serviceTextAttributesMap.get("schemaMap")));
+             */
+
+            /**
+             * NOTE: because the instance is NOT set when registering for Micrservice
+             *  extract instance object
+             *  String instanceString = serviceTextAttributesMap.get("instance");
+             *  serverMicroservice.addInstance(buildServerMicroserviceInstanceFromMapString(instanceString));
+             */
 
             return serverMicroservice;
         }
@@ -97,19 +105,6 @@ public class ServerRegisterUtil {
         if ( microserviceVersionContainer != null && microserviceVersionContainer.getVersions() != null){
             microserviceVersionContainer.getVersions().put(serverMicroservice.getVersion(), serverMicroservice);
         }
-
-        // TODO: ??? 这部分是不是放到buildMappingForMicroserviceInstanceRegistration里面？ build server side Mapping for ServerMicroservice object
-        // build the mapping for this serverMicroservice's instances
-//        Map<String, ServerMicroserviceInstance> instanceMap = serverMicroservice.getInstances();
-//
-//        if (instanceMap != null && !instanceMap.isEmpty()){
-//            ServerMicroservice returnedSrverMicroservice = applicationContainer.getOrCreateServerMicroservice(serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
-//            for (ServerMicroserviceInstance serverMicroserviceInstance : instanceMap.values()){
-//                if(returnedSrverMicroservice != null && returnedSrverMicroservice.getInstances() != null) {
-//                    returnedSrverMicroservice.addInstance(serverMicroserviceInstance);
-//                }
-//            }
-//        }
 
     }
 
