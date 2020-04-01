@@ -2,11 +2,9 @@ package org.apache.servicecomb.embedsc.server;
 
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
-import org.apache.servicecomb.embedsc.server.model.ApplicationContainer;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
 import org.apache.servicecomb.serviceregistry.api.registry.Microservice;
-import org.apache.servicecomb.serviceregistry.api.registry.MicroserviceInstance;
 import org.apache.servicecomb.serviceregistry.api.response.GetSchemaResponse;
 import org.apache.servicecomb.serviceregistry.client.http.Holder;
 import org.slf4j.Logger;
@@ -38,19 +36,31 @@ public class MicroserviceService {
     //  called by ServiceCombMDSNServiceListener when a new service is registered/broadcasted through MDNS
     public String registerMicroservice(ServiceInstance mdnsService) {
 
-        // convernt MDNS service format to our server side format: ServerMicroservice
-        ServerMicroservice serverMicroservice = ServerRegisterUtil.convertToServerMicroservice(mdnsService);
-        LOGGER.info("register microservice : {}/{}/{}/ to server side in-memory map", serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
+        String serviceId = null;
+        // need to check if this id already exists in server side
+        if (mdnsService != null && mdnsService.getTextAttributes() != null){
+            serviceId = (String) mdnsService.getTextAttributes().get("serviceId");
+            ServerMicroservice serverMicroservice =  ServerRegisterUtil.getServerMicroserviceMap().get(serviceId);
+            // update existing service properties
+            if (serverMicroservice != null){
+                Map<String, String> newPropertiesMap = ServerRegisterUtil.convertMapStringToMap((String)mdnsService.getTextAttributes().get("properties"));
+                serverMicroservice.getProperties().putAll(newPropertiesMap);
+                ServerRegisterUtil.buildMappingForMicroserviceRegistration(serverMicroservice);
+            } else {
+                // register new service
 
-        //for easy query, put ServerMicroservice into Map<serviceId, ServerMicroservice>, and create empty Map<instanceId, ServerMicroserviceInstance> for holding ServerMicroserviceInsance
-        ServerRegisterUtil.getServerMicroserviceMap().put(serverMicroservice.getServiceId(), serverMicroservice);
-        ServerRegisterUtil.getServerMicroserviceInstanceMap().computeIfAbsent(serverMicroservice.getServiceId(), k -> new ConcurrentHashMap<>());
+                // convernt MDNS service format to our server side format: ServerMicroservice
+                ServerMicroservice newServerMicroservice = ServerRegisterUtil.convertToServerMicroservice(mdnsService);
+                LOGGER.info("register microservice : {}/{}/{}/ to server side in-memory map", serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
 
-        // build mapping for App, Service, Version, ServiceInstance objects
-        ServerRegisterUtil.buildMappingForMicroserviceRegistration(serverMicroservice);
-
-        return serverMicroservice.getServiceId();
-
+                //for easy query, put ServerMicroservice into Map<serviceId, ServerMicroservice>, and create empty Map<instanceId, ServerMicroserviceInstance> for holding ServerMicroserviceInsance
+                ServerRegisterUtil.getServerMicroserviceMap().put(serverMicroservice.getServiceId(), newServerMicroservice);
+                ServerRegisterUtil.getServerMicroserviceInstanceMap().computeIfAbsent(serverMicroservice.getServiceId(), k -> new ConcurrentHashMap<>());
+                // build mapping for App, Service, Version, ServiceInstance objects
+                ServerRegisterUtil.buildMappingForMicroserviceRegistration(newServerMicroservice);
+            }
+        }
+        return serviceId;
     }
 
     public Microservice getAggregatedMicroservice(String microserviceId) {

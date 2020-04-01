@@ -105,9 +105,19 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
         return this.getMicroservice(microserviceId);
     }
 
+    // TODO ???
     @Override
     public boolean updateMicroserviceProperties(String microserviceId, Map<String, String> serviceProperties) {
-        return false;
+        Microservice microservice = this.getMicroservice(microserviceId);
+        if(microservice == null) {
+            return false;
+        }
+        // putAll will update values for keys exist in the map, also add new <key, value> to the map
+        microservice.getProperties().putAll(serviceProperties);
+
+        String serviceId = this.registerMicroservice(microservice);
+
+        return (serviceId != null && !serviceId.isEmpty()) ? true : false;
     }
 
     @Override
@@ -268,12 +278,14 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
             // convention to append "._http._tcp.local."
             ServiceName serviceName = new ServiceName(microserviceInstanceId + "._http._tcp.local.");
             // broadcast to MDNS
-            this.multicastDNSService.unregister(serviceName);
+            if(this.multicastDNSService.unregister(serviceName)){
+                return true;
+            };
         } catch (IOException e) {
             LOGGER.error("Failed to unregister microservice instance from mdns server. servcieId: {} instanceId:{}", microserviceId, microserviceInstanceId,  e);
             return false;
         }
-        return true;
+        return false;
     }
 
     @Override

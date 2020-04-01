@@ -42,7 +42,7 @@ public class ServerRegisterUtil {
     }
 
     public static ServerMicroservice convertToServerMicroservice(ServiceInstance service){
-        
+
         Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
 
         if (serviceTextAttributesMap != null && !serviceTextAttributesMap.isEmpty()){
@@ -119,7 +119,7 @@ public class ServerRegisterUtil {
     }
 
 
-    private static Map<String, String> convertMapStringToMap(String mapString){
+    public static Map<String, String> convertMapStringToMap(String mapString){
         if(mapString != null && mapString.length() > 2){
             Map<String, String> map = new HashMap<>();
             String[]  keyValuePairArray = mapString.substring(1, mapString.length() -1 ).split(",");
