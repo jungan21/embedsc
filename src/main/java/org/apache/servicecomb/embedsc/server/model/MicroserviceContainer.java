@@ -16,10 +16,6 @@ public class MicroserviceContainer {
         return services;
     }
 
-    public void setServices(Map<String, MicroserviceVersionContainer> services) {
-        this.services = services;
-    }
-
     public MicroserviceContainer(ApplicationContainer applicationContainer, String appId) {
         this.applicationContainer = applicationContainer;
         this.appId = appId;

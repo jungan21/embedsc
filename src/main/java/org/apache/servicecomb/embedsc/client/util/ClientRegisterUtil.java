@@ -28,7 +28,7 @@ import static org.apache.servicecomb.embedsc.EmbedSCConstants.INSTANCE_ID;
 
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
-import org.apache.servicecomb.embedsc.server.model.RegisterServiceType;
+import org.apache.servicecomb.embedsc.server.model.RegisterServiceEnumType;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.foundation.common.net.IpPort;
@@ -48,8 +48,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-
-
 public class ClientRegisterUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRegisterUtil.class);
@@ -62,7 +60,7 @@ public class ClientRegisterUtil {
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
             Map<String, String> serviceTextAttributesMap = new HashMap<>();
-            serviceTextAttributesMap.put(REGISTER_SERVICE_TYPE, RegisterServiceType.MICROSERVICE.toString());
+            serviceTextAttributesMap.put(REGISTER_SERVICE_TYPE, RegisterServiceEnumType.MICROSERVICE.name());
             serviceTextAttributesMap.put(APP_ID, microservice.getAppId());
             serviceTextAttributesMap.put(SERVICE_NAME, microservice.getServiceName());
             serviceTextAttributesMap.put(VERSION, microservice.getVersion());
@@ -102,13 +100,12 @@ public class ClientRegisterUtil {
     public static ServiceInstance convertToMDNSServiceSchema(String serviceId,  String schemaId, String schemaContent, IpPortManager ipPortManager) {
 
         try {
-            // set it to placehold value: {} so that it won't break the main servicecomb service registration logic
             ServiceName serviceName = new ServiceName(serviceId + MDNS_SERVICE_NAME_SPLITER + schemaId + MDNS_SERVICE_NAME_SUFFIX);
             IpPort ipPort = ipPortManager.getAvailableAddress();
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
             Map<String, String> serviceSchemaTextAttributesMap = new HashMap<>();
-            serviceSchemaTextAttributesMap.put(REGISTER_SERVICE_TYPE, RegisterServiceType.MICROSERVICE_SCHEMA.toString());
+            serviceSchemaTextAttributesMap.put(REGISTER_SERVICE_TYPE, RegisterServiceEnumType.MICROSERVICE_SCHEMA.name());
             serviceSchemaTextAttributesMap.put(SERVICE_ID, serviceId);
             serviceSchemaTextAttributesMap.put(SCHEMA_ID, schemaId);
             serviceSchemaTextAttributesMap.put(SCHEMA_CONTENT, schemaContent);
@@ -131,7 +128,7 @@ public class ClientRegisterUtil {
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
             Map<String, String> serviceInstanceTextAttributesMap = new HashMap<>();
-            serviceInstanceTextAttributesMap.put(REGISTER_SERVICE_TYPE, RegisterServiceType.MICROSERVICE_INSTANCE.toString());
+            serviceInstanceTextAttributesMap.put(REGISTER_SERVICE_TYPE, RegisterServiceEnumType.MICROSERVICE_INSTANCE.name());
             serviceInstanceTextAttributesMap.put(SERVICE_ID, serviceId);
             serviceInstanceTextAttributesMap.put(INSTANCE_ID, microserviceInstanceId);
             serviceInstanceTextAttributesMap.put(STATUS, microserviceInstance.getStatus().toString());

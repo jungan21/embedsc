@@ -5,7 +5,7 @@ import net.posick.mDNS.ServiceInstance;
 import org.apache.servicecomb.embedsc.EmbedSCConstants;
 import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
 import org.apache.servicecomb.embedsc.server.MicroserviceService;
-import org.apache.servicecomb.embedsc.server.model.RegisterServiceType;
+import org.apache.servicecomb.embedsc.server.model.RegisterServiceEnumType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Message;
@@ -22,24 +22,31 @@ public class ServiceCombMDSNServiceListener implements DNSSDListener {
     public ServiceCombMDSNServiceListener(){
         super();
         this.microserviceService = new MicroserviceService();
+        this.microserviceInstanceService = new MicroserviceInstanceService();
     }
 
     public void serviceDiscovered(Object id, ServiceInstance service) {
         LOGGER.debug("Microservice registered to MDNS server {}", service);
-
         if(service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
             Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
             String registerServiceType = serviceTextAttributesMap.get(EmbedSCConstants.REGISTER_SERVICE_TYPE);
 
-            if (registerServiceType.equals(RegisterServiceType.MICROSERVICE)){
-                microserviceService.registerMicroservice(service);
-            } else if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_INSTANCE)){
-                microserviceInstanceService.registerMicroserviceInstance(service);
-            } else if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_SCHEMA)){
-                microserviceService.registerSchema(service);
-            } else {
-                LOGGER.error("Unrecognized service type {} when during registration", registerServiceType);
+            switch (RegisterServiceEnumType.valueOf(registerServiceType)) {
+                case MICROSERVICE:
+                    microserviceService.registerMicroservice(service);
+                    break;
+                case MICROSERVICE_INSTANCE:
+                    microserviceInstanceService.registerMicroserviceInstance(service);
+                    break;
+                case MICROSERVICE_SCHEMA:
+                    microserviceService.registerSchema(service);
+                    break;
+                default:
+                    LOGGER.error("Unrecognized service type {} when during registration", registerServiceType);
+                    break;
             }
+        } else {
+            LOGGER.error("Failed to register service as service: {} is null OR service's text attributes is null", service);
         }
     }
 
@@ -51,16 +58,21 @@ public class ServiceCombMDSNServiceListener implements DNSSDListener {
             Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
             String registerServiceType = serviceTextAttributesMap.get(EmbedSCConstants.REGISTER_SERVICE_TYPE);
 
-            if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_INSTANCE.toString())){
-                microserviceInstanceService.unregisterMicroserviceInstance(serviceTextAttributesMap.get("serviceId"), serviceTextAttributesMap.get("instanceId"));
-            } else {
-                LOGGER.error("Unrecognized service type {} during unregistration", registerServiceType);
+            switch (RegisterServiceEnumType.valueOf(registerServiceType)) {
+                case MICROSERVICE_INSTANCE:
+                    microserviceInstanceService.unregisterMicroserviceInstance(serviceTextAttributesMap.get("serviceId"), serviceTextAttributesMap.get("instanceId"));
+                    break;
+                default:
+                    LOGGER.error("Unrecognized service type {} when during unregistration", registerServiceType);
+                    break;
             }
+        } else {
+            LOGGER.error("Failed to unregister service as service: {} is null OR service's text attributes is null", service);
         }
     }
 
     public void handleException(Object id, Exception e) {
-        LOGGER.error("Running into erros when registering/unregistering to/from MDNS service registry center", e);
+        LOGGER.error("Running into errors when registering/unregistering to/from MDNS service registry center", e);
     }
 
     public void receiveMessage(Object id, Message message) {

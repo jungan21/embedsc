@@ -65,20 +65,6 @@ public class ServerRegisterUtil {
             serverMicroservice.setFramework(convertMapStringToMap(serviceTextAttributesMap.get(FRAMEWORK)));
             serverMicroservice.setProperties(convertMapStringToMap(serviceTextAttributesMap.get(PROPERTIES)));
 
-            /**
-             *
-             * NOTE: because the schemaMap is NOT set when registering for Micrservice
-             *  schemaMap Map<String, String> Map<schemaId, content>
-             *  serverMicroservice.setSchemaMap(convertMapStringToMap(serviceTextAttributesMap.get("schemaMap")));
-             */
-
-            /**
-             * NOTE: because the instance is NOT set when registering for Micrservice
-             *  extract instance object
-             *  String instanceString = serviceTextAttributesMap.get("instance");
-             *  serverMicroservice.addInstance(buildServerMicroserviceInstanceFromMapString(instanceString));
-             */
-
             return serverMicroservice;
         }
         return null;
@@ -145,7 +131,6 @@ public class ServerRegisterUtil {
             serverMicroserviceInstance.setStatus(map.get(STATUS));
             serverMicroserviceInstance.setVersion(map.get(VERSION));
             serverMicroserviceInstance.setHostName(map.get(HOST_NAME));
-            // TODO: serverMicroserviceInstance.setHealthCheck();
 
             // ["rest://127.0.0.1:8080", "rest://127.0.0.1:8081"]
             String endPointsString = map.get(ENDPOINTS);
@@ -160,34 +145,5 @@ public class ServerRegisterUtil {
         }
         return null;
     }
-
-//    public static Microservice convertToClientMicroservice(ServerMicroservice serverMicroservice) {
-//        Microservice microservice = new Microservice();
-//
-//        microservice.setServiceId(serverMicroservice.getServiceId());
-//        microservice.setAppId(serverMicroservice.getAppId());
-//        microservice.setServiceName(serverMicroservice.getServiceName());
-//        microservice.setVersion(serverMicroservice.getVersion());
-//        microservice.setLevel(serverMicroservice.getLevel());
-//        microservice.setAlias(serverMicroservice.getAlias());
-//        microservice.setSchemas(serverMicroservice.getSchemas());
-//        microservice.setStatus(serverMicroservice.getStatus());
-//        microservice.setRegisterBy(serverMicroservice.getRegisterBy());
-//        microservice.setEnvironment(serverMicroservice.getEnvironment());
-//        microservice.setDescription(serverMicroservice.getDescription());
-//
-//        Framework framework = new Framework();
-//        framework.setName(serverMicroservice.getFramework().get("name"));
-//        framework.setVersion(serverMicroservice.getFramework().get("version"));
-//        microservice.setFramework(framework);
-//
-//        microservice.setProperties(serverMicroservice.getProperties());
-//
-//        for (Map.Entry<String, String> entry : serverMicroservice.getSchemaMap().entrySet()){
-//            microservice.addSchema(entry.getKey(), entry.getValue());
-//        }
-//
-//        return microservice;
-//    }
 
 }

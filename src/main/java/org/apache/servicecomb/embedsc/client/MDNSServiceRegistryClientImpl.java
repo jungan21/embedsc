@@ -1,6 +1,7 @@
 package org.apache.servicecomb.embedsc.client;
 
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_SUFFIX;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_CONTENT_PLACEHOLDER;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
@@ -14,6 +15,7 @@ import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.*;
+import org.apache.servicecomb.serviceregistry.api.response.FindInstancesResponse;
 import org.apache.servicecomb.serviceregistry.api.response.GetSchemaResponse;
 import org.apache.servicecomb.serviceregistry.api.response.HeartbeatResponse;
 import org.apache.servicecomb.serviceregistry.api.response.MicroserviceInstanceChangedEvent;
@@ -22,6 +24,10 @@ import org.apache.servicecomb.serviceregistry.client.ServiceRegistryClient;
 import org.apache.servicecomb.serviceregistry.client.http.Holder;
 import org.apache.servicecomb.serviceregistry.client.http.MicroserviceInstances;
 import org.apache.servicecomb.serviceregistry.config.ServiceRegistryConfig;
+import org.apache.servicecomb.serviceregistry.version.Version;
+import org.apache.servicecomb.serviceregistry.version.VersionRule;
+import org.apache.servicecomb.serviceregistry.version.VersionRuleUtils;
+import org.apache.servicecomb.serviceregistry.version.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +36,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_CONTENT_PLACEHOLDER;
 
 public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
@@ -56,9 +60,7 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
     }
 
     @Override
-    public void init() {
-
-    }
+    public void init() {}
 
     @Override
     public List<Microservice> getAllMicroservices() {
@@ -101,13 +103,11 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
         return serverMicroservice != null ? ClientRegisterUtil.convertToClientMicroservice(serverMicroservice) : null;
     }
 
-    // TODO ???
     @Override
     public Microservice getAggregatedMicroservice(String microserviceId) {
         return this.getMicroservice(microserviceId);
     }
 
-    // TODO ???
     @Override
     public boolean updateMicroserviceProperties(String microserviceId, Map<String, String> serviceProperties) {
         Microservice microservice = this.getMicroservice(microserviceId);
@@ -136,12 +136,14 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
         }
 
         LOGGER.info("MDNS Service registration center doesn't record the schemaContent:\n {}", schemaContent);
+
+        // set it to placehold value: {} so that it won't break the main servicecomb service registration logic
         schemaContent = SCHEMA_CONTENT_PLACEHOLDER;
-        ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceSchema(microserviceId, schemaId, schemaContent, this.ipPortManager);
+        ServiceInstance serviceSchema = ClientRegisterUtil.convertToMDNSServiceSchema(microserviceId, schemaId, schemaContent, this.ipPortManager);
 
         // broadcast to MDNS
         try {
-            this.multicastDNSService.register(service);
+            this.multicastDNSService.register(serviceSchema);
             return true;
         } catch (IOException e) {
             LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS. The schema content is: {}", schemaId, microserviceId, schemaContent, e);
@@ -173,7 +175,6 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
     @Override
     public Holder<List<GetSchemaResponse>> getSchemas(String microserviceId) {
         // this method is called in MicroserviceRegisterTask.java doRegister()
-
         Holder<List<GetSchemaResponse>> resultHolder = new Holder<>();
         Microservice microservice = this.getMicroservice(microserviceId);
         if (microservice == null) {
@@ -216,7 +217,18 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public List<MicroserviceInstance> getMicroserviceInstance(String consumerId, String providerId) {
-        return null;
+        List<MicroserviceInstance> microserviceInstanceResult = new ArrayList<>();
+        List<ServerMicroserviceInstance>  serverMicroserviceInstanceList = this.microserviceInstanceService.getMicroserviceInstance(consumerId, providerId);
+        if (serverMicroserviceInstanceList == null || serverMicroserviceInstanceList.isEmpty()) {
+            LOGGER.error("Invalid serviceId: {}", providerId);
+            return microserviceInstanceResult;
+        }
+
+        for (ServerMicroserviceInstance serverMicroserviceInstance : serverMicroserviceInstanceList){
+            microserviceInstanceResult.add(ClientRegisterUtil.convertToClientMicroserviceInstance(serverMicroserviceInstance));
+            return microserviceInstanceResult;
+        }
+        return microserviceInstanceResult;
     }
 
     @Override
@@ -262,31 +274,91 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
         return false;
     }
 
-    // TODO ???
     @Override
     public HeartbeatResponse heartbeat(String microserviceId, String microserviceInstanceId) {
         return null;
     }
 
-    // TODO ???
     @Override
-    public void watch(String selfMicroserviceId, AsyncResultCallback<MicroserviceInstanceChangedEvent> callback) {
-
-    }
+    public void watch(String selfMicroserviceId, AsyncResultCallback<MicroserviceInstanceChangedEvent> callback) {}
 
     @Override
-    public void watch(String selfMicroserviceId, AsyncResultCallback<MicroserviceInstanceChangedEvent> callback, AsyncResultCallback<Void> onOpen, AsyncResultCallback<Void> onClose) {
-
-    }
+    public void watch(String selfMicroserviceId, AsyncResultCallback<MicroserviceInstanceChangedEvent> callback, AsyncResultCallback<Void> onOpen, AsyncResultCallback<Void> onClose) {}
 
     @Override
     public List<MicroserviceInstance> findServiceInstance(String consumerId, String appId, String serviceName, String versionRule) {
-        return null;
+        MicroserviceInstances instances = findServiceInstances(consumerId, appId, serviceName, versionRule, null);
+        if (instances.isMicroserviceNotExist()) {
+            return null;
+        }
+        return instances.getInstancesResponse().getInstances();
     }
 
     @Override
-    public MicroserviceInstances findServiceInstances(String consumerId, String appId, String serviceName, String versionRule, String revision) {
-        return null;
+    public MicroserviceInstances findServiceInstances(String consumerId, String appId, String serviceName, String strVersionRule, String revision) {
+        int currentRevision = 1;
+
+        List<MicroserviceInstance> allInstances = new ArrayList<>();
+        MicroserviceInstances microserviceInstances = new MicroserviceInstances();
+        FindInstancesResponse response = new FindInstancesResponse();
+        if (revision != null && currentRevision == Integer.parseInt(revision)) {
+            microserviceInstances.setNeedRefresh(false);
+            return microserviceInstances;
+        }
+
+        microserviceInstances.setRevision(String.valueOf(currentRevision));
+        VersionRule versionRule = VersionRuleUtils.getOrCreate(strVersionRule);
+        Microservice latestMicroservice = findLatest(appId, serviceName, versionRule);
+        if (latestMicroservice == null) {
+            microserviceInstances.setMicroserviceNotExist(true);
+            return microserviceInstances;
+        }
+
+        Version latestVersion = VersionUtils.getOrCreate(latestMicroservice.getVersion());
+        for (Microservice microservice : this.getAllMicroservices()) {
+            if (!isSameMicroservice(microservice, appId, serviceName)) {
+                continue;
+            }
+
+            Version version = VersionUtils.getOrCreate(microservice.getVersion());
+            if (!versionRule.isMatch(version, latestVersion)) {
+                continue;
+            }
+
+            List<MicroserviceInstance> microserviceInstanceList = this.getMicroserviceInstance(null, microservice.getServiceId());
+            allInstances.addAll(microserviceInstanceList);
+        }
+        response.setInstances(allInstances);
+        microserviceInstances.setInstancesResponse(response);
+
+        return microserviceInstances;
+    }
+
+
+
+    private Microservice findLatest(String appId, String serviceName, VersionRule versionRule) {
+        Version latestVersion = null;
+        Microservice latest = null;
+        List<Microservice> microserviceList = this.getAllMicroservices();
+        for (Microservice microservice : microserviceList) {
+            if (!isSameMicroservice(microservice, appId, serviceName)) {
+                continue;
+            }
+            Version version = VersionUtils.getOrCreate(microservice.getVersion());
+            if (!versionRule.isAccept(version)) {
+                continue;
+            }
+            if (latestVersion == null || version.compareTo(latestVersion) > 0) {
+                latestVersion = version;
+                latest = microservice;
+            }
+        }
+
+        return latest;
+    }
+
+    private boolean isSameMicroservice(Microservice microservice, String appId, String serviceName) {
+        return microservice.getAppId().equals(appId) && microservice.getServiceName().equals(serviceName);
     }
 
     @Override

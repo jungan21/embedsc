@@ -18,7 +18,7 @@ public class ApplicationContainer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationContainer.class);
 
     // Map<appId, Map<serviceName, Map<version, Microservice>>>
-    //private Map<String, Map<String, Map<String, Microservice>>> appContainer = new ConcurrentHashMap<>();
+    // private Map<String, Map<String, Map<String, Microservice>>> appContainer = new ConcurrentHashMap<>();
     // key:appId
     private Map<String, MicroserviceContainer> apps = new ConcurrentHashMap<>();
 

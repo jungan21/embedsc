@@ -1,20 +1,20 @@
 package org.apache.servicecomb.embedsc.server;
 
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_ID;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.INSTANCE_ID;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.PROPERTIES;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.STATUS;
+
 import net.posick.mDNS.ServiceInstance;
 import org.apache.servicecomb.embedsc.server.model.ApplicationContainer;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
-import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
-import org.apache.servicecomb.serviceregistry.api.registry.MicroserviceInstance;
-import org.apache.servicecomb.serviceregistry.api.registry.ServiceCenterInfo;
-import org.apache.servicecomb.serviceregistry.api.response.HeartbeatResponse;
-import org.apache.servicecomb.serviceregistry.api.response.MicroserviceInstanceChangedEvent;
 
-import org.apache.servicecomb.serviceregistry.client.http.MicroserviceInstances;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,17 +28,21 @@ public class MicroserviceInstanceService {
         String instanceId = null;
 
         if (mdnsService != null && mdnsService.getTextAttributes() != null) {
-            serviceId = (String) mdnsService.getTextAttributes().get("serviceId");
-            instanceId = (String) mdnsService.getTextAttributes().get("instanceId");
+            serviceId = (String) mdnsService.getTextAttributes().get(SERVICE_ID);
+            instanceId = (String) mdnsService.getTextAttributes().get(INSTANCE_ID);
 
             // need to check if this id already exists in server side
-            ServerMicroserviceInstance serverMicroserviceInstance = ServerRegisterUtil.getServerMicroserviceInstanceMap().get(serviceId).get(instanceId);
+            ServerMicroserviceInstance serverMicroserviceInstance = null;
+            Map<String, ServerMicroserviceInstance> serverMicroserviceInstanceMap = ServerRegisterUtil.getServerMicroserviceInstanceMap().get(serviceId);
+            if (serverMicroserviceInstanceMap != null && !serverMicroserviceInstanceMap.isEmpty()) {
+                serverMicroserviceInstance = serverMicroserviceInstanceMap.get(instanceId);
+            }
 
-            // update existing service instance properties
             if (serverMicroserviceInstance != null){
-                Map<String, String> newPropertiesMap = ServerRegisterUtil.convertMapStringToMap((String)mdnsService.getTextAttributes().get("properties"));
+                // update existing service instance properties
+                Map<String, String> newPropertiesMap = ServerRegisterUtil.convertMapStringToMap((String)mdnsService.getTextAttributes().get(PROPERTIES));
                 serverMicroserviceInstance.getProperties().putAll(newPropertiesMap);
-                serverMicroserviceInstance.setStatus((String)mdnsService.getTextAttributes().get("status"));
+                serverMicroserviceInstance.setStatus((String)mdnsService.getTextAttributes().get(STATUS));
                 ServerRegisterUtil.buildMappingForMicroserviceInstanceRegistration(serverMicroserviceInstance);
             } else {
                 // register new service instance
@@ -81,46 +85,14 @@ public class MicroserviceInstanceService {
         return true;
     }
 
-    public List<MicroserviceInstance> getMicroserviceInstance(String consumerId, String providerId) {
-        return null;
-    }
-
-    public boolean updateInstanceProperties(String microserviceId, String microserviceInstanceId, Map<String, String> instanceProperties) {
-        return false;
-    }
-
-
-    public HeartbeatResponse heartbeat(String microserviceId, String microserviceInstanceId) {
-        return null;
-    }
-
-    public void watch(String selfMicroserviceId, AsyncResultCallback<MicroserviceInstanceChangedEvent> callback) {
-
-    }
-
-    public void watch(String selfMicroserviceId, AsyncResultCallback<MicroserviceInstanceChangedEvent> callback, AsyncResultCallback<Void> onOpen, AsyncResultCallback<Void> onClose) {
-
-    }
-
-    public List<MicroserviceInstance> findServiceInstance(String consumerId, String appId, String serviceName, String versionRule) {
-        return null;
-    }
-
-    public MicroserviceInstances findServiceInstances(String consumerId, String appId, String serviceName, String versionRule, String revision) {
-        return null;
-    }
-
     public ServerMicroserviceInstance findServiceInstance(String serviceId, String instanceId) {
         Map<String, ServerMicroserviceInstance>  serverMicroserviceInstanceMap = ServerRegisterUtil.getServerMicroserviceInstanceMap().get(serviceId);
         return (serverMicroserviceInstanceMap != null && !serverMicroserviceInstanceMap.isEmpty()) ? serverMicroserviceInstanceMap.get(instanceId) : null;
     }
 
-    public ServiceCenterInfo getServiceCenterInfo() {
-        return null;
-    }
-
-    public boolean undateMicroserviceInstanceStatus(String microserviceId, String microserviceInstanceId, String status) {
-        return false;
+    public List<ServerMicroserviceInstance> getMicroserviceInstance(String consumerId, String providerId) {
+        Map<String, ServerMicroserviceInstance> instanceMap = ServerRegisterUtil.getServerMicroserviceInstanceMap().get(providerId);
+        return instanceMap == null || instanceMap.isEmpty() ? null : new ArrayList<>(instanceMap.values());
     }
 
 }

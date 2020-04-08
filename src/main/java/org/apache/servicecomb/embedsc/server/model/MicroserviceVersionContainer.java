@@ -24,10 +24,6 @@ public class MicroserviceVersionContainer {
         return versions;
     }
 
-    public void setVersions(Map<String, ServerMicroservice> versions) {
-        this.versions = versions;
-    }
-
     public ServerMicroservice getOrCreateServerMicroservice(String version) {
         return versions.computeIfAbsent(version, v -> new ServerMicroservice(applicationContainer, appId, serviceName, version));
     }

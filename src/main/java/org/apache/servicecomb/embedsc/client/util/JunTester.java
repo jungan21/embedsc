@@ -1,14 +1,11 @@
 package org.apache.servicecomb.embedsc.client.util;
 
-import com.google.common.io.Files;
-import net.posick.mDNS.ServiceName;
 import org.apache.commons.io.FileUtils;
-import org.xbill.DNS.TextParseException;
+import org.apache.servicecomb.embedsc.server.model.RegisterServiceEnumType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
@@ -16,7 +13,32 @@ import java.util.zip.GZIPOutputStream;
 public class JunTester {
 
     public static void main(String[] args) throws IOException {
-        System.out.println("\n" +  "after compress string bytearray length:" + zip(readFile()).length);
+        Map map1 = new LinkedHashMap();
+        map1.put("name", "jun");
+        map1.put("age", "21");
+
+        Map<String, String> map2 = map1;
+       // System.out.println(map2);
+
+        String registerServiceType = "MICROSERVICE_INSTANCE";
+        System.out.print(RegisterServiceEnumType.valueOf(registerServiceType).name());
+        switch (RegisterServiceEnumType.valueOf(registerServiceType)) {
+            case MICROSERVICE:
+                //System.out.print("MICROSERVICE");
+                break;
+            case MICROSERVICE_INSTANCE:
+                //System.out.print("MICROSERVICE_INSTANCE");
+                break;
+            case MICROSERVICE_SCHEMA:
+                //System.out.print("MICROSERVICE_SCHEMA");
+                break;
+            default:
+                //System.out.print("default");
+                break;
+        }
+
+
+       // System.out.println("\n" +  "after compress string bytearray length:" + zip(readFile()).length);
     }
 
     public static List<String> splitschemaContentString (String schemaContentString, int chunkSize) {

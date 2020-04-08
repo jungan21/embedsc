@@ -1,12 +1,14 @@
 package org.apache.servicecomb.embedsc.server;
 
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_ID;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.PROPERTIES;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_ID;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_CONTENT;
+
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
-import org.apache.servicecomb.serviceregistry.api.registry.Microservice;
-import org.apache.servicecomb.serviceregistry.api.response.GetSchemaResponse;
-import org.apache.servicecomb.serviceregistry.client.http.Holder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +31,7 @@ public class MicroserviceService {
     }
 
     public ServerMicroservice getMicroservice(String microserviceId) {
-        ServerMicroservice serverMicroservice= ServerRegisterUtil.getServerMicroserviceMap().get(microserviceId);
-        return serverMicroservice;
+        return ServerRegisterUtil.getServerMicroserviceMap().get(microserviceId);
     }
 
     //  called by ServiceCombMDSNServiceListener when a new service is registered/broadcasted through MDNS
@@ -39,36 +40,30 @@ public class MicroserviceService {
         String serviceId = null;
         // need to check if this id already exists in server side
         if (mdnsService != null && mdnsService.getTextAttributes() != null){
-            serviceId = (String) mdnsService.getTextAttributes().get("serviceId");
+            serviceId = (String) mdnsService.getTextAttributes().get(SERVICE_ID);
             ServerMicroservice serverMicroservice =  ServerRegisterUtil.getServerMicroserviceMap().get(serviceId);
-            // update existing service properties
+
             if (serverMicroservice != null){
-                Map<String, String> newPropertiesMap = ServerRegisterUtil.convertMapStringToMap((String)mdnsService.getTextAttributes().get("properties"));
+                // update existing service properties
+                Map<String, String> newPropertiesMap = ServerRegisterUtil.convertMapStringToMap((String)mdnsService.getTextAttributes().get(PROPERTIES));
                 serverMicroservice.getProperties().putAll(newPropertiesMap);
                 ServerRegisterUtil.buildMappingForMicroserviceRegistration(serverMicroservice);
             } else {
                 // register new service
-
                 // convernt MDNS service format to our server side format: ServerMicroservice
                 ServerMicroservice newServerMicroservice = ServerRegisterUtil.convertToServerMicroservice(mdnsService);
-                LOGGER.info("register microservice : {}/{}/{}/ to server side in-memory map", serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
+
+                LOGGER.info("register microservice : {}/{}/{}/ to server side in-memory map", newServerMicroservice.getAppId(), newServerMicroservice.getServiceName(), newServerMicroservice.getVersion());
 
                 //for easy query, put ServerMicroservice into Map<serviceId, ServerMicroservice>, and create empty Map<instanceId, ServerMicroserviceInstance> for holding ServerMicroserviceInsance
-                ServerRegisterUtil.getServerMicroserviceMap().put(serverMicroservice.getServiceId(), newServerMicroservice);
-                ServerRegisterUtil.getServerMicroserviceInstanceMap().computeIfAbsent(serverMicroservice.getServiceId(), k -> new ConcurrentHashMap<>());
+                ServerRegisterUtil.getServerMicroserviceMap().put(newServerMicroservice.getServiceId(), newServerMicroservice);
+                ServerRegisterUtil.getServerMicroserviceInstanceMap().computeIfAbsent(newServerMicroservice.getServiceId(), k -> new ConcurrentHashMap<>());
+
                 // build mapping for App, Service, Version, ServiceInstance objects
                 ServerRegisterUtil.buildMappingForMicroserviceRegistration(newServerMicroservice);
             }
         }
         return serviceId;
-    }
-
-    public Microservice getAggregatedMicroservice(String microserviceId) {
-        return null;
-    }
-
-    public boolean updateMicroserviceProperties(String microserviceId, Map<String, String> serviceProperties) {
-        return false;
     }
 
     public boolean isSchemaExist(String microserviceId, String schemaId) {
@@ -82,53 +77,29 @@ public class MicroserviceService {
     }
 
     public boolean registerSchema(ServiceInstance mdnsService) {
-
         ServiceName serviceName = mdnsService.getName();
+
         if (serviceName != null && !serviceName.toString().isEmpty()){
-            //  sample serviceName for schema:  microserviceId_schemaId._http._tcp.local.
-            String mdnsServiceName = serviceName.toString().split("\\._")[0]; // microserviceId_schemaId
             Map<String, String> serviceSchemaTextAttributes = mdnsService.getTextAttributes();
 
-            String totalChunkNumber = null;
-
             if (serviceSchemaTextAttributes != null && !serviceSchemaTextAttributes.isEmpty()){
-                totalChunkNumber = serviceSchemaTextAttributes.get("totalChunkNumber");
 
-                // indicate this a full schemaContent (no split), otherwise, we have to join all schemaContentChunk together for build full schemaContent
-                if (totalChunkNumber == null){
-                    String microserviceId = serviceSchemaTextAttributes.get("serviceId");
-                    String schemaId = serviceSchemaTextAttributes.get("schemaId");
-                    String schemaContent = serviceSchemaTextAttributes.get("schemaContent");
+                String microserviceId = serviceSchemaTextAttributes.get(SERVICE_ID);
+                String schemaId = serviceSchemaTextAttributes.get(SCHEMA_ID);
+                String schemaContent = serviceSchemaTextAttributes.get(SCHEMA_CONTENT);
 
-                    // keep this copy for efficient querying microservice
-                    ServerMicroservice serverMicroservice = this.getMicroservice(microserviceId);
-                    serverMicroservice.addSchema(schemaId, schemaContent);
+                // keep this copy for efficient querying microservice
+                ServerMicroservice serverMicroservice = this.getMicroservice(microserviceId);
+                serverMicroservice.addSchema(schemaId, schemaContent);
 
-                    // keep track of the mapping relationship
-                    ServerMicroservice serverMicroserviceInContainer = ServerRegisterUtil.getApplicationContainer().getServerMicroservice(serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
-                    serverMicroserviceInContainer.addSchema(schemaId, schemaContent);
-
-                    return true;
-                } else {
-                    // TODO find all schemaConentChunks for this <microserviceId, schemaId> and combine them together
-
-                }
+                // keep track of the mapping relationship
+                ServerMicroservice serverMicroserviceInMappingContainer = ServerRegisterUtil.getApplicationContainer().
+                        getServerMicroservice(serverMicroservice.getAppId(), serverMicroservice.getServiceName(), serverMicroservice.getVersion());
+                serverMicroserviceInMappingContainer.addSchema(schemaId, schemaContent);
+                return true;
             }
         }
-
         return false;
-    }
-
-    public String getSchema(String microserviceId, String schemaId) {
-        return null;
-    }
-
-    public String getAggregatedSchema(String microserviceId, String schemaId) {
-        return null;
-    }
-
-    public Holder<List<GetSchemaResponse>> getSchemas(String microserviceId) {
-        return null;
     }
 
 }

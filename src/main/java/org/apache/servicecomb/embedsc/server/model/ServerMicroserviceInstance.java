@@ -21,7 +21,7 @@ public class ServerMicroserviceInstance {
 
     private List<String> endpoints = new ArrayList();
 
-    private String hostName; // e.g. DESKTOP-Q2K46AO
+    private String hostName;
 
     private String status;
 
@@ -34,9 +34,7 @@ public class ServerMicroserviceInstance {
     // key: client siede Microservice property/attribute
     private Map<String, String> serviceInstanceTextAttributesMap = new ConcurrentHashMap<>();
 
-    public ServerMicroserviceInstance(){
-
-    }
+    public ServerMicroserviceInstance(){}
 
     public ServerMicroserviceInstance(String appId, String serviceName, String version, String instanceId) {
         this.appId = appId;
