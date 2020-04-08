@@ -1,5 +1,31 @@
 package org.apache.servicecomb.embedsc.client.util;
 
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.REGISTER_SERVICE_TYPE;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.APP_ID;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_ID;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_NAME;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.VERSION;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.LEVEL;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.ALIAS;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMAS;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.STATUS;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.DESCRIPTION;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.REGISTER_BY;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.ENVIRONMENT;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.PROPERTIES;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.FRAMEWORK;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.FRAMEWORK_NAME;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.TIMESTAMP;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.MOD_TIMESTAMP;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_ID;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_CONTENT;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.ENDPOINTS;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.HOST_NAME;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_SUFFIX;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_SPLITER;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_HOST_NAME_SUFFIX;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.INSTANCE_ID;
+
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
 import org.apache.servicecomb.embedsc.server.model.RegisterServiceType;
@@ -15,81 +41,53 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.TextParseException;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+
 
 public class ClientRegisterUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRegisterUtil.class);
 
-    public static final String registerServiceType = "registerServiceType";
-
-    public static final int SCHEMA_CONTENT_CHUNK_SIZE_IN_BYTE = 1200;
-
     // for Microservice
     public static ServiceInstance convertToMDNSService(String serviceId, Microservice microservice, IpPortManager ipPortManager) {
         try {
-            ServiceName serviceName = new ServiceName(microservice.getServiceName()+ "._http._tcp.local.");
+            ServiceName serviceName = new ServiceName(microservice.getServiceName()+ MDNS_SERVICE_NAME_SUFFIX);
             IpPort ipPort = ipPortManager.getAvailableAddress();
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
             Map<String, String> serviceTextAttributesMap = new HashMap<>();
-            serviceTextAttributesMap.put(registerServiceType, RegisterServiceType.MICROSERVICE.toString());
-            serviceTextAttributesMap.put("appId", microservice.getAppId());
-            serviceTextAttributesMap.put("serviceName", microservice.getServiceName());
-            serviceTextAttributesMap.put("version", microservice.getVersion());
-            serviceTextAttributesMap.put("serviceId", serviceId);
-            serviceTextAttributesMap.put("level", microservice.getLevel());
-            serviceTextAttributesMap.put("alias", microservice.getAlias());
-            serviceTextAttributesMap.put("schemas", microservice.getSchemas().toString());
-            serviceTextAttributesMap.put("status", microservice.getStatus());
-            serviceTextAttributesMap.put("description", microservice.getDescription());
-            serviceTextAttributesMap.put("registerBy", microservice.getRegisterBy());
-            serviceTextAttributesMap.put("environment", microservice.getEnvironment());
-            serviceTextAttributesMap.put("properties", microservice.getProperties().toString());
+            serviceTextAttributesMap.put(REGISTER_SERVICE_TYPE, RegisterServiceType.MICROSERVICE.toString());
+            serviceTextAttributesMap.put(APP_ID, microservice.getAppId());
+            serviceTextAttributesMap.put(SERVICE_NAME, microservice.getServiceName());
+            serviceTextAttributesMap.put(VERSION, microservice.getVersion());
+            serviceTextAttributesMap.put(SERVICE_ID, serviceId);
+            serviceTextAttributesMap.put(LEVEL, microservice.getLevel());
+            serviceTextAttributesMap.put(ALIAS, microservice.getAlias());
+            serviceTextAttributesMap.put(SCHEMAS, microservice.getSchemas().toString());
+            serviceTextAttributesMap.put(STATUS, microservice.getStatus());
+            serviceTextAttributesMap.put(DESCRIPTION, microservice.getDescription());
+            serviceTextAttributesMap.put(REGISTER_BY, microservice.getRegisterBy());
+            serviceTextAttributesMap.put(ENVIRONMENT, microservice.getEnvironment());
+            serviceTextAttributesMap.put(PROPERTIES, microservice.getProperties().toString());
 
             // Framework object has name and value attributes
             Map<String, String> frameworkMap = new HashMap<>();
-            frameworkMap.put("name", microservice.getFramework().getName());
-            frameworkMap.put("version", microservice.getFramework().getVersion());
-            serviceTextAttributesMap.put("framework", frameworkMap.toString());
+            frameworkMap.put(FRAMEWORK_NAME, microservice.getFramework().getName());
+            frameworkMap.put(VERSION, microservice.getFramework().getVersion());
+            serviceTextAttributesMap.put(FRAMEWORK, frameworkMap.toString());
 
             // set the timestamp
             String timestamp = String.valueOf(Instant.now().getEpochSecond());
-            serviceTextAttributesMap.put("timestamp", timestamp);
-            serviceTextAttributesMap.put("modTimestamp", timestamp);
+            serviceTextAttributesMap.put(TIMESTAMP, timestamp);
+            serviceTextAttributesMap.put(MOD_TIMESTAMP, timestamp);
 
-            /**
-             * TODO: SchemaMap information should be done through service schema registration process....not here?
-             * serviceTextAttributesMap.put("schemaMap", microservice.getSchemaMap().toString());
-             *
-             * TODO: following instance information should be done through serviceInstance registration process ...not here?
-             *
-             *  MicroserviceInstance microserviceInstance = microservice.getInstance();
-             *  if (microserviceInstance != null) {
-             *      StringBuilder builder = new StringBuilder();
-             *      String microserviceInstanceString =  builder.append('{')
-             *              .append("instanceId='").append(microserviceInstance.getInstanceId()).append('\'')
-             *              .append(", serviceId='").append(microserviceInstance.getInstanceId()).append( '\'')
-             *              .append(", endpoints=").append(microserviceInstance.getEndpoints()).append( '\'')
-             *              .append( ", hostName='").append(microserviceInstance.getHostName()).append('\'')
-             *             .append(", status=").append(microserviceInstance.getStatus()).append('\'')
-             *              .append(", properties=").append( microserviceInstance.getProperties()).append('\'')
-             *              .append(", timestamp='").append(microserviceInstance.getTimestamp()).append('\'')
-             *              .append('}')
-             *             .toString();
-             *      serviceTextAttributesMap.put("instance",  microserviceInstanceString);
-             *  }
-             *
-             */
-            // Microservice doesn't have host name
+            // Microservice doesn't have host name, only Microserver Instance has host name
             return new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), null, addresses, serviceTextAttributesMap);
 
         } catch (TextParseException e) {
@@ -101,35 +99,26 @@ public class ClientRegisterUtil {
     }
 
     // for Microservice schema
-    public static ServiceInstance convertToMDNSServiceSchema(String microserviceId, String schemaId, Integer schemaChunkId, String schemaContent, Integer totalChunkNumber, IpPortManager ipPortManager) {
+    public static ServiceInstance convertToMDNSServiceSchema(String serviceId,  String schemaId, String schemaContent, IpPortManager ipPortManager) {
 
         try {
-            Map<String, String> serviceSchemaTextAttributesMap = new HashMap<>();
-
-            ServiceName serviceName = null;
-            if (schemaChunkId != null){
-                serviceSchemaTextAttributesMap.put("schemaChunkId", String.valueOf(schemaChunkId));
-            }
-
-            if (totalChunkNumber > 1){
-                serviceSchemaTextAttributesMap.put("totalChunkNumber", String.valueOf(totalChunkNumber));
-            }
-
+            // set it to placehold value: {} so that it won't break the main servicecomb service registration logic
+            ServiceName serviceName = new ServiceName(serviceId + MDNS_SERVICE_NAME_SPLITER + schemaId + MDNS_SERVICE_NAME_SUFFIX);
             IpPort ipPort = ipPortManager.getAvailableAddress();
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
-            serviceName = new ServiceName(microserviceId + "_" + schemaId + "._http._tcp.local.");
-            serviceSchemaTextAttributesMap.put(registerServiceType, RegisterServiceType.MICROSERVICE_SCHEMA.toString());
-            serviceSchemaTextAttributesMap.put("serviceId", microserviceId);
-            serviceSchemaTextAttributesMap.put("schemaId", schemaId);
-            serviceSchemaTextAttributesMap.put("schemaContent", schemaContent);
+            Map<String, String> serviceSchemaTextAttributesMap = new HashMap<>();
+            serviceSchemaTextAttributesMap.put(REGISTER_SERVICE_TYPE, RegisterServiceType.MICROSERVICE_SCHEMA.toString());
+            serviceSchemaTextAttributesMap.put(SERVICE_ID, serviceId);
+            serviceSchemaTextAttributesMap.put(SCHEMA_ID, schemaId);
+            serviceSchemaTextAttributesMap.put(SCHEMA_CONTENT, schemaContent);
 
             return new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), null, addresses, serviceSchemaTextAttributesMap);
 
         } catch (TextParseException e) {
-            LOGGER.error("microservice has either invalid microserviceId {} OR invalid schemaId {}", microserviceId, schemaId, e);
+            LOGGER.error("microservice has either invalid microserviceId {} OR invalid schemaId {}", serviceId, schemaId, e);
         } catch (UnknownHostException e1) {
-            LOGGER.error("microserviceId {} schema registration {} with Unknown Host name {}/", microserviceId, schemaId, ipPortManager.getAvailableAddress().getHostOrIp(), e1);
+            LOGGER.error("microserviceId {} schema registration {} with Unknown Host name {}/", serviceId, schemaId, ipPortManager.getAvailableAddress().getHostOrIp(), e1);
         }
         return null;
     }
@@ -137,23 +126,22 @@ public class ClientRegisterUtil {
     // for Microservie instance
     public static ServiceInstance convertToMDNSServiceInstance(String serviceId, String microserviceInstanceId, MicroserviceInstance microserviceInstance, IpPortManager ipPortManager) {
         try {
-            ServiceName serviceName = new ServiceName(microserviceInstanceId + "._http._tcp.local.");
+            ServiceName serviceName = new ServiceName(microserviceInstanceId + MDNS_SERVICE_NAME_SUFFIX);
             IpPort ipPort = ipPortManager.getAvailableAddress();
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
             Map<String, String> serviceInstanceTextAttributesMap = new HashMap<>();
-            serviceInstanceTextAttributesMap.put(registerServiceType, RegisterServiceType.MICROSERVICE_INSTANCE.toString());
-            serviceInstanceTextAttributesMap.put("serviceId", serviceId);
-            serviceInstanceTextAttributesMap.put("instanceId", microserviceInstanceId);
-            serviceInstanceTextAttributesMap.put("status", microserviceInstance.getStatus().toString());
-            serviceInstanceTextAttributesMap.put("environment", microserviceInstance.getEnvironment());
-            serviceInstanceTextAttributesMap.put("properties", microserviceInstance.getProperties().toString());
-            serviceInstanceTextAttributesMap.put("timestamp", microserviceInstance.getTimestamp());
-            serviceInstanceTextAttributesMap.put("endpoints", microserviceInstance.getEndpoints().toString());
+            serviceInstanceTextAttributesMap.put(REGISTER_SERVICE_TYPE, RegisterServiceType.MICROSERVICE_INSTANCE.toString());
+            serviceInstanceTextAttributesMap.put(SERVICE_ID, serviceId);
+            serviceInstanceTextAttributesMap.put(INSTANCE_ID, microserviceInstanceId);
+            serviceInstanceTextAttributesMap.put(STATUS, microserviceInstance.getStatus().toString());
+            serviceInstanceTextAttributesMap.put(ENVIRONMENT, microserviceInstance.getEnvironment());
+            serviceInstanceTextAttributesMap.put(PROPERTIES, microserviceInstance.getProperties().toString());
+            serviceInstanceTextAttributesMap.put(TIMESTAMP, microserviceInstance.getTimestamp());
+            serviceInstanceTextAttributesMap.put(ENDPOINTS, microserviceInstance.getEndpoints().toString());
             String hostName = microserviceInstance.getHostName();
-            serviceInstanceTextAttributesMap.put("hostName", hostName);
-            Name mdnsHostName = new Name(hostName +".local.");
-
+            serviceInstanceTextAttributesMap.put(HOST_NAME, hostName);
+            Name mdnsHostName = new Name(hostName + MDNS_HOST_NAME_SUFFIX);
 
             return new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), mdnsHostName, addresses, serviceInstanceTextAttributesMap);
 
@@ -186,8 +174,8 @@ public class ClientRegisterUtil {
         Map<String, String> frameworkMap = serverMicroservice.getFramework();
         if (frameworkMap != null && !frameworkMap.isEmpty()) {
             Framework framework = new Framework();
-            framework.setName(frameworkMap.get("name"));
-            framework.setVersion(frameworkMap.get("version"));
+            framework.setName(frameworkMap.get(FRAMEWORK_NAME));
+            framework.setVersion(frameworkMap.get(VERSION));
             microservice.setFramework(framework);
         }
 
@@ -197,8 +185,6 @@ public class ClientRegisterUtil {
                 // fill out Map<schemaId, schemaContent> and List<schemaId>
                 microservice.addSchema(entry.getKey(), entry.getValue());
         }
-
-        // TODO: microservice.setInstance(); ???
         return microservice;
     }
 
@@ -214,28 +200,8 @@ public class ClientRegisterUtil {
         return microserviceInstance;
     }
 
-    public static List<String> splitschemaContentString (String schemaContentString, int chunkSize) {
-        int start = 0;
-        int end = chunkSize;
-        int length = schemaContentString.length();
-        List<String> subSchemaContentStringList = new ArrayList<>();
-        boolean isEnd = true;
-
-        while (isEnd){
-            if(start >= length){
-                end = length;
-                isEnd = false;
-            }
-            subSchemaContentStringList.add(schemaContentString.substring(start, end)) ;
-            start = end;
-            end = end + chunkSize;
-        }
-        return subSchemaContentStringList;
-    }
-
     public static String generateServiceId(Microservice microservice){
-        String serviceIdStringIndex = String.join("/", microservice.getAppId(), microservice.getServiceName(), microservice.getVersion());
-        return UUID.nameUUIDFromBytes(serviceIdStringIndex.getBytes()).toString();
+        return  microservice.getAppId() + microservice.getServiceName() + microservice.getVersion() + UUID.randomUUID().toString();
     }
 
     public static String generateServiceInstanceId(MicroserviceInstance microserviceInstance){

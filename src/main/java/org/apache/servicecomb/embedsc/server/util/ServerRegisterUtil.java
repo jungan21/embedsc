@@ -1,24 +1,19 @@
 package org.apache.servicecomb.embedsc.server.util;
 
 import net.posick.mDNS.ServiceInstance;
-
-import org.apache.servicecomb.embedsc.server.model.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.servicecomb.embedsc.server.model.ApplicationContainer;
+import org.apache.servicecomb.embedsc.server.model.MicroserviceVersionContainer;
+import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
+import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.*;
 
 public class ServerRegisterUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerRegisterUtil.class);
-
-    //Constants
-    public static final String[] discoverServiceTypes = new String[] {"_http._tcp."}; // "_http._tcp.": Web pages
-    public static final String registerServiceType = "registerServiceType";
 
     // Microservice && MicroserviceInstance Container
     private static ApplicationContainer appContainer = new ApplicationContainer();
@@ -47,28 +42,28 @@ public class ServerRegisterUtil {
 
         if (serviceTextAttributesMap != null && !serviceTextAttributesMap.isEmpty()){
             ServerMicroservice serverMicroservice =  new ServerMicroservice();
-            serverMicroservice.setServiceId(serviceTextAttributesMap.get("serviceId"));
-            serverMicroservice.setAppId(serviceTextAttributesMap.get("appId"));
-            serverMicroservice.setServiceName(serviceTextAttributesMap.get("serviceName"));
-            serverMicroservice.setLevel(serviceTextAttributesMap.get("level"));
-            serverMicroservice.setAlias(serviceTextAttributesMap.get("alias"));
-            serverMicroservice.setVersion(serviceTextAttributesMap.get("version"));
-            serverMicroservice.setTimestamp(serviceTextAttributesMap.get("timestamp"));
-            serverMicroservice.setModTimestamp(serviceTextAttributesMap.get("modTimestamp"));
-            serverMicroservice.setStatus(serviceTextAttributesMap.get("status"));
-            serverMicroservice.setRegisterBy(serviceTextAttributesMap.get("registerBy"));
-            serverMicroservice.setEnvironment(serviceTextAttributesMap.get("environment"));
-            serverMicroservice.setDescription(serviceTextAttributesMap.get("description"));
+            serverMicroservice.setServiceId(serviceTextAttributesMap.get(SERVICE_ID));
+            serverMicroservice.setAppId(serviceTextAttributesMap.get(APP_ID));
+            serverMicroservice.setServiceName(serviceTextAttributesMap.get(SERVICE_NAME));
+            serverMicroservice.setLevel(serviceTextAttributesMap.get(LEVEL));
+            serverMicroservice.setAlias(serviceTextAttributesMap.get(ALIAS));
+            serverMicroservice.setVersion(serviceTextAttributesMap.get(VERSION));
+            serverMicroservice.setTimestamp(serviceTextAttributesMap.get(TIMESTAMP));
+            serverMicroservice.setModTimestamp(serviceTextAttributesMap.get(MOD_TIMESTAMP));
+            serverMicroservice.setStatus(serviceTextAttributesMap.get(STATUS));
+            serverMicroservice.setRegisterBy(serviceTextAttributesMap.get(REGISTER_BY));
+            serverMicroservice.setEnvironment(serviceTextAttributesMap.get(ENVIRONMENT));
+            serverMicroservice.setDescription(serviceTextAttributesMap.get(DESCRIPTION));
 
             // ["schema1", "schema2"] just schema name list
-            String schemaString = serviceTextAttributesMap.get("schemas");
+            String schemaString = serviceTextAttributesMap.get(SCHEMAS);
             if (schemaString != null && schemaString.length() > 2) {
                 serverMicroservice.setSchemas(Arrays.asList(schemaString.substring(1, schemaString.length() - 1).split(",")));
             }
 
             // framework,  properties and schemaMap are Map type
-            serverMicroservice.setFramework(convertMapStringToMap(serviceTextAttributesMap.get("framework")));
-            serverMicroservice.setProperties(convertMapStringToMap(serviceTextAttributesMap.get("properties")));
+            serverMicroservice.setFramework(convertMapStringToMap(serviceTextAttributesMap.get(FRAMEWORK)));
+            serverMicroservice.setProperties(convertMapStringToMap(serviceTextAttributesMap.get(PROPERTIES)));
 
             /**
              *
@@ -105,7 +100,6 @@ public class ServerRegisterUtil {
         if ( microserviceVersionContainer != null && microserviceVersionContainer.getVersions() != null){
             microserviceVersionContainer.getVersions().put(serverMicroservice.getVersion(), serverMicroservice);
         }
-
     }
 
     public static void buildMappingForMicroserviceInstanceRegistration(ServerMicroserviceInstance serverMicroserviceInstance) {
@@ -122,10 +116,10 @@ public class ServerRegisterUtil {
     public static Map<String, String> convertMapStringToMap(String mapString){
         if(mapString != null && mapString.length() > 2){
             Map<String, String> map = new HashMap<>();
-            String[]  keyValuePairArray = mapString.substring(1, mapString.length() -1 ).split(",");
+            String[]  keyValuePairArray = mapString.substring(1, mapString.length() -1 ).split(SPLITER_COMMA);
             for (String keyValuePairString : keyValuePairArray){
-                if(keyValuePairString != null && keyValuePairString.length() > 0 && keyValuePairString.contains("=")) {
-                    map.put(keyValuePairString.split("=")[0], keyValuePairString.split("=")[1]);
+                if(keyValuePairString != null && keyValuePairString.length() > 0 && keyValuePairString.contains(SPLITER_MAP_KEY_VALUE)) {
+                    map.put(keyValuePairString.split(SPLITER_MAP_KEY_VALUE)[0], keyValuePairString.split(SPLITER_MAP_KEY_VALUE)[1]);
                 }
             }
             return map;
@@ -144,23 +138,23 @@ public class ServerRegisterUtil {
     private static ServerMicroserviceInstance buildServerMicroserviceInstanceFromMap (Map<String, String> map) {
         if (map != null && !map.isEmpty()) {
             ServerMicroserviceInstance serverMicroserviceInstance = new ServerMicroserviceInstance();
-            serverMicroserviceInstance.setInstanceId(map.get("instanceId"));
-            serverMicroserviceInstance.setServiceId(map.get("serviceId"));
-            serverMicroserviceInstance.setAppId(map.get("appId"));
-            serverMicroserviceInstance.setServiceName(map.get("ServiceName"));
-            serverMicroserviceInstance.setStatus(map.get("status"));
-            serverMicroserviceInstance.setVersion(map.get("version"));
-            serverMicroserviceInstance.setHostName(map.get("hostName"));
+            serverMicroserviceInstance.setInstanceId(map.get(INSTANCE_ID));
+            serverMicroserviceInstance.setServiceId(map.get(SERVICE_ID));
+            serverMicroserviceInstance.setAppId(map.get(APP_ID));
+            serverMicroserviceInstance.setServiceName(map.get(SERVICE_NAME));
+            serverMicroserviceInstance.setStatus(map.get(STATUS));
+            serverMicroserviceInstance.setVersion(map.get(VERSION));
+            serverMicroserviceInstance.setHostName(map.get(HOST_NAME));
             // TODO: serverMicroserviceInstance.setHealthCheck();
 
             // ["rest://127.0.0.1:8080", "rest://127.0.0.1:8081"]
-            String endPointsString = map.get("endpoints");
+            String endPointsString = map.get(ENDPOINTS);
             if (endPointsString != null && endPointsString.length() > 2) {
-                serverMicroserviceInstance.setEndpoints(Arrays.asList(endPointsString.substring(1, endPointsString.length() - 1).split(",")));
+                serverMicroserviceInstance.setEndpoints(Arrays.asList(endPointsString.substring(1, endPointsString.length() - 1).split(SPLITER_COMMA)));
             }
 
             // properties are Map type
-            serverMicroserviceInstance.setProperties(convertMapStringToMap(map.get("properties")));
+            serverMicroserviceInstance.setProperties(convertMapStringToMap(map.get(PROPERTIES)));
 
             return serverMicroserviceInstance;
         }

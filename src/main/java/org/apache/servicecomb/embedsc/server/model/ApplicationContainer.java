@@ -1,10 +1,11 @@
 package org.apache.servicecomb.embedsc.server.model;
 
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.DISCOVER_SERVICE_TYPES;
+
 import net.posick.mDNS.Browse;
 import net.posick.mDNS.DNSSDListener;
 import net.posick.mDNS.MulticastDNSService;
 import org.apache.servicecomb.embedsc.server.listener.ServiceCombMDSNServiceListener;
-import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class ApplicationContainer {
         try {
             // https://github.com/posicks/mdnsjava/blob/master/README.md
             MulticastDNSService service = new MulticastDNSService();
-            Browse browser = new Browse(ServerRegisterUtil.discoverServiceTypes);
+            Browse browser = new Browse(DISCOVER_SERVICE_TYPES);
             DNSSDListener listener = new ServiceCombMDSNServiceListener();
             service.startServiceDiscovery(browser, listener);
         } catch (IOException e) {

@@ -1,36 +1,11 @@
 package org.apache.servicecomb.embedsc.server.model;
 
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.FRAMEWORK;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_ID;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-
-/**
- * {
- *   "serviceId": "769d5439888854928cf37efac7bab2b69f8b4a46",
- *   "appId": "springmvc",
- *   "serviceName": "helloworldprovider",
- *   "version": "0.0.1",
- *   "level": "FRONT",
- *   "schemas": [
- *     "helloworldprovider"
- *   ],
- *   "status": "UP",
- *   "properties": {
- *     "allowCrossApp": "false",
- *     "dcs": "false",
- *     "ddm": "false",
- *     "dms": "false"
- *   },
- *   "timestamp": "1584468365",
- *   "modTimestamp": "1584468365",
- *   "registerBy": "SDK",
- *   "framework": {
- *     "name": "servicecomb-java-chassis",
- *     "version": "CSE:2.3.69;ServiceComb:1.2.0.B006"
- *   }
- * }
- */
 
 public class ServerMicroservice {
 
@@ -123,7 +98,7 @@ public class ServerMicroservice {
 
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
-        this.serviceTextAttributesMap.put("serviceId", serviceId);
+        this.serviceTextAttributesMap.put(SERVICE_ID, serviceId);
     }
 
     public Map<String, String> getServiceTextAttributesMap() {
@@ -220,7 +195,7 @@ public class ServerMicroservice {
 
     public void setFramework(Map<String, String> framework) {
         this.framework = framework;
-        this.serviceTextAttributesMap.put("framework", framework.toString());
+        this.serviceTextAttributesMap.put(FRAMEWORK, framework.toString());
     }
 
     public String getEnvironment() {

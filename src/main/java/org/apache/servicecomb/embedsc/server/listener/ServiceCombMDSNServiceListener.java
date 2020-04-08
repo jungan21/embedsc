@@ -2,10 +2,10 @@ package org.apache.servicecomb.embedsc.server.listener;
 
 import net.posick.mDNS.DNSSDListener;
 import net.posick.mDNS.ServiceInstance;
+import org.apache.servicecomb.embedsc.EmbedSCConstants;
 import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
 import org.apache.servicecomb.embedsc.server.MicroserviceService;
 import org.apache.servicecomb.embedsc.server.model.RegisterServiceType;
-import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Message;
@@ -29,7 +29,7 @@ public class ServiceCombMDSNServiceListener implements DNSSDListener {
 
         if(service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
             Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
-            String registerServiceType = serviceTextAttributesMap.get(ServerRegisterUtil.registerServiceType);
+            String registerServiceType = serviceTextAttributesMap.get(EmbedSCConstants.REGISTER_SERVICE_TYPE);
 
             if (registerServiceType.equals(RegisterServiceType.MICROSERVICE)){
                 microserviceService.registerMicroservice(service);
@@ -49,9 +49,9 @@ public class ServiceCombMDSNServiceListener implements DNSSDListener {
 
         if(service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
             Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
-            String registerServiceType = serviceTextAttributesMap.get(ServerRegisterUtil.registerServiceType);
+            String registerServiceType = serviceTextAttributesMap.get(EmbedSCConstants.REGISTER_SERVICE_TYPE);
 
-            if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_INSTANCE)){
+            if (registerServiceType.equals(RegisterServiceType.MICROSERVICE_INSTANCE.toString())){
                 microserviceInstanceService.unregisterMicroserviceInstance(serviceTextAttributesMap.get("serviceId"), serviceTextAttributesMap.get("instanceId"));
             } else {
                 LOGGER.error("Unrecognized service type {} during unregistration", registerServiceType);
@@ -60,7 +60,7 @@ public class ServiceCombMDSNServiceListener implements DNSSDListener {
     }
 
     public void handleException(Object id, Exception e) {
-        LOGGER.error("Microservice register/unregister to/from MDNS exception", e);
+        LOGGER.error("Running into erros when registering/unregistering to/from MDNS service registry center", e);
     }
 
     public void receiveMessage(Object id, Message message) {

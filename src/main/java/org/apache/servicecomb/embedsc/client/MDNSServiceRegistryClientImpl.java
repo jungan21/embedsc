@@ -1,5 +1,7 @@
 package org.apache.servicecomb.embedsc.client;
 
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_SUFFIX;
+
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import net.posick.mDNS.MulticastDNSService;
@@ -25,10 +27,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_CONTENT_PLACEHOLDER;
 
 public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
@@ -116,7 +119,7 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
         String serviceId = this.registerMicroservice(microservice);
 
-        return (serviceId != null && !serviceId.isEmpty()) ? true : false;
+        return serviceId != null && !serviceId.isEmpty();
     }
 
     @Override
@@ -124,7 +127,6 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
         return this.microserviceService.isSchemaExist(microserviceId, schemaId);
     }
 
-    // TODO for schema size > 1200 Bytes
     @Override
     public boolean registerSchema(String microserviceId, String schemaId, String schemaContent) {
         Microservice microservice = this.getMicroservice(microserviceId);
@@ -133,60 +135,18 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
             return false;
         }
 
-        byte[] schemaContentBytes = null;
-        if(schemaContent != null && !schemaContent.isEmpty()){
-            try {
-                schemaContentBytes = schemaContent.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS as schemaContent has unsupported endocing: {}",schemaId, microserviceId, schemaContent, e);
-                return false;
-            }
-        }
+        LOGGER.info("MDNS Service registration center doesn't record the schemaContent:\n {}", schemaContent);
+        schemaContent = SCHEMA_CONTENT_PLACEHOLDER;
+        ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceSchema(microserviceId, schemaId, schemaContent, this.ipPortManager);
 
-        if ( schemaContentBytes != null && schemaContentBytes.length  <= ClientRegisterUtil.SCHEMA_CONTENT_CHUNK_SIZE_IN_BYTE){
-            // schemaContent size is <= 1200 Bytes
-            ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceSchema(microserviceId, schemaId, null, schemaContent, 1, this.ipPortManager);
-            // broadcast to MDNS
-            try {
-                this.multicastDNSService.register(service);
-            }  catch (IOException e) {
-                LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS. The schema content is: {}",schemaId, microserviceId, schemaContent, e);
-                return false;
-            }
+        // broadcast to MDNS
+        try {
+            this.multicastDNSService.register(service);
             return true;
-
-        } else {
-            // schemaContent size is > 1200 Bytes. need to split schemaContent
-            // TODO: ignore this logic for now
-            /**
-             *  RFC: https://tools.ietf.org/html/rfc6762#page-51 UTF-8 format && https://tools.ietf.org/html/rfc6762#page-46  payload size ~1500 bytes DNS UDP: 512, MDNS UDP: 1500
-             *
-             * mdns lib:
-             *      NetworkProcessor.java Normally MTU size is 1500, but can be up to 9000 for jumbo frames. DEFAULT_MTU = 1500
-             *      DatagramProcessor.java  Determine maximum mDNS Payload size maxPayloadSize = mtu (default 1500) - 40 ( IPv6 Header Size )- 8 (UDP Header)
-             */
-           // List<String> schemaContentStringList = ClientRegisterUtil.splitschemaContentString(schemaContent, ClientRegisterUtil.SCHEMA_CONTENT_CHUNK_SIZE_IN_BYTE);
-            // return this.registerSchemaChunks(microserviceId, schemaId, schemaContentStringList);
+        } catch (IOException e) {
+            LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS. The schema content is: {}", schemaId, microserviceId, schemaContent, e);
             return false;
         }
-
-    }
-
-    private boolean registerSchemaChunks(String microserviceId, String schemaId, List<String> schemaContentStringList){
-
-        int schemaContentChunkId = 0;
-        int totalChunkNumber = schemaContentStringList.size();
-        for (String schemaChunkContent : schemaContentStringList){
-            ServiceInstance service = ClientRegisterUtil.convertToMDNSServiceSchema(microserviceId, schemaId, schemaContentChunkId, schemaChunkContent, totalChunkNumber, this.ipPortManager);
-            try {
-                this.multicastDNSService.register(service);
-            }  catch (IOException e) {
-                LOGGER.error("Failed to register schemaId: {} for microserviceId: {} to MDNS. The schema content is: {}",schemaId, microserviceId, schemaChunkContent, e);
-                return false;
-            }
-            schemaContentChunkId++;
-        }
-        return true;
     }
 
     @Override
@@ -276,7 +236,7 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
         String serviceInstanceId = this.registerMicroserviceInstance(microserviceInstance);
 
-        return (serviceInstanceId != null && !serviceInstanceId.isEmpty()) ? true : false;
+        return serviceInstanceId != null && !serviceInstanceId.isEmpty();
     }
 
     @Override
@@ -290,11 +250,11 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
         try {
             // convention to append "._http._tcp.local."
-            ServiceName serviceName = new ServiceName(microserviceInstanceId + "._http._tcp.local.");
+            ServiceName serviceName = new ServiceName(microserviceInstanceId + MDNS_SERVICE_NAME_SUFFIX);
             // broadcast to MDNS
             if(this.multicastDNSService.unregister(serviceName)){
                 return true;
-            };
+            }
         } catch (IOException e) {
             LOGGER.error("Failed to unregister microservice instance from mdns server. servcieId: {} instanceId:{}", microserviceId, microserviceInstanceId,  e);
             return false;
@@ -362,14 +322,14 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
             throw new IllegalArgumentException("Invalid microserviceId=" +  microserviceId + "OR instanceId=" + instanceId);
         }
 
-        if ( status.equals(microserviceInstance.getStatus().toString())){
+        if (status.equals(microserviceInstance.getStatus())){
             throw new IllegalArgumentException("service instance status is same as server side existing status: " +  microserviceInstance.getStatus().toString());
         }
 
         LOGGER.debug("update status of microservice instance: {}", status);
         microserviceInstance.setStatus(status);
         String serviceInstanceId = this.registerMicroserviceInstance(microserviceInstance);
-        return (serviceInstanceId != null && !serviceInstanceId.isEmpty()) ? true : false;
+        return serviceInstanceId != null && !serviceInstanceId.isEmpty();
     }
 
 }

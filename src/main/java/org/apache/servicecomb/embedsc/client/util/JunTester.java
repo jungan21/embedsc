@@ -39,7 +39,7 @@ public class JunTester {
     }
 
     public static String readFile() throws IOException {
-        File file = new File("C:\\Users\\j00549873\\Documents\\workspace\\java\\embedsc\\src\\main\\java\\org\\apache\\servicecomb\\embedsc\\client\\util\\iam-swagger.yml");
+        File file = new File("");
 
         String str = FileUtils.readFileToString(file,StandardCharsets.UTF_8);
        // System.out.print("before compress string length:" + str.length());
