@@ -41,6 +41,8 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MDNSServiceRegistryClientImpl.class);
 
+    public static final String MDNS_REGISTRY_KEY = "mdns.registry";
+
     private IpPortManager ipPortManager;
     private MulticastDNSService multicastDNSService;
 

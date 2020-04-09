@@ -19,7 +19,7 @@ public class ServerMicroserviceInstance {
 
     private String serviceId;
 
-    private List<String> endpoints = new ArrayList();
+    private List<String> endpoints = new ArrayList<>();
 
     private String hostName;
 
