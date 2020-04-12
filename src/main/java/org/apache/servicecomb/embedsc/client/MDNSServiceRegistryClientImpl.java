@@ -13,6 +13,7 @@ import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
 import org.apache.servicecomb.embedsc.server.MicroserviceService;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
+import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.*;
 import org.apache.servicecomb.serviceregistry.api.response.FindInstancesResponse;
@@ -138,6 +139,9 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
         }
 
         LOGGER.info("MDNS Service registration center doesn't record the schemaContent for schemaId:\n {}", schemaId);
+
+        // for Consumer to retrieve the provider's schemas TODO: add rest endpoint for consumer to get Map content
+        ServerRegisterUtil.schemasMap.put(schemaId, schemaContent);
 
         // set it to placehold value: {} so that it won't break the main servicecomb service registration logic
         schemaContent = SCHEMA_CONTENT_PLACEHOLDER;

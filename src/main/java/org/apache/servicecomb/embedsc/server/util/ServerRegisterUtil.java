@@ -50,6 +50,8 @@ public class ServerRegisterUtil {
         return serverMicroserviceMap;
     }
 
+    public static Map<String, String> schemasMap = new ConcurrentHashMap<>();
+
     public static Map<String, Map<String, ServerMicroserviceInstance>>  getServerMicroserviceInstanceMap() {
         return serverMicroserviceInstanceMap;
     }
@@ -62,7 +64,6 @@ public class ServerRegisterUtil {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             startAsyncListenerForRegisteredServices();
-
         });
 
     }
