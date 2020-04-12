@@ -8,6 +8,7 @@ import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_CONTENT;
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroservice;
+import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +57,13 @@ public class MicroserviceService {
                 LOGGER.info("register microservice : {}/{}/{}/ to server side in-memory map", newServerMicroservice.getAppId(), newServerMicroservice.getServiceName(), newServerMicroservice.getVersion());
 
                 //for easy query, put ServerMicroservice into Map<serviceId, ServerMicroservice>, and create empty Map<instanceId, ServerMicroserviceInstance> for holding ServerMicroserviceInsance
-                ServerRegisterUtil.getServerMicroserviceMap().put(newServerMicroservice.getServiceId(), newServerMicroservice);
-                ServerRegisterUtil.getServerMicroserviceInstanceMap().computeIfAbsent(newServerMicroservice.getServiceId(), k -> new ConcurrentHashMap<>());
+                Map<String, ServerMicroservice> serverMicroserviceMap = ServerRegisterUtil.getServerMicroserviceMap();
 
+                serverMicroserviceMap.put(newServerMicroservice.getServiceId(), newServerMicroservice);
+                LOGGER.info("Jun DEBUG serverMicroserviceMap {}", serverMicroserviceMap);
+                Map<String, Map<String, ServerMicroserviceInstance>> serverMicroserviceInstanceMap =  ServerRegisterUtil.getServerMicroserviceInstanceMap();
+                serverMicroserviceInstanceMap.computeIfAbsent(newServerMicroservice.getServiceId(), k -> new ConcurrentHashMap<>());
+                LOGGER.info("Jun DEBUG serverMicroserviceInstanceMap {}", serverMicroserviceInstanceMap);
                 // build mapping for App, Service, Version, ServiceInstance objects
                 ServerRegisterUtil.buildMappingForMicroserviceRegistration(newServerMicroservice);
             }

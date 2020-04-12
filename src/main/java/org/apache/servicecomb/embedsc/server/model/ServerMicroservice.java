@@ -15,25 +15,29 @@ public class ServerMicroservice {
 
     private String serviceName;
 
-    private String version; // "1.3.0"
+    private String version;
 
     private String serviceId;
 
-    private String level; // "FRONT", "BACK"
+    // "FRONT", "BACK"
+    private String level;
 
-    private List<String> schemas; // list of schema names
+    // "UP", "DOWN", "UNKNOWN"
+    private String status;
 
-    private String status; // "UP", "DOWN", "UNKNOWN"
+    // {"allowCrossApp"="false", "dcs"="false"}
+    private Map<String, String> properties;
 
-    private Map<String, String> properties; // {"allowCrossApp"="false", "dcs"="false"}
-
-    private String timestamp; // Time.now() Unix sytle 1584468365 ,go service center has sample.
+    // Time.now() Unix sytle 1584468365 ,go service center has sample.
+    private String timestamp;
 
     private String alias;
 
-    private String modTimestamp; // last time service is updated ...same format as createTimestamp
+    // last time service is updated ...same format as createTimestamp
+    private String modTimestamp;
 
-    private String registerBy; // "SDK"
+    // "SDK"
+    private String registerBy;
 
     private String description;
 
@@ -45,6 +49,9 @@ public class ServerMicroservice {
     private Map<String, String> serviceTextAttributesMap = new ConcurrentHashMap<>();
 
     private Map<String, String> schemaMap = new ConcurrentHashMap<>();
+
+    // list of schema Ids
+    private List<String> schemas;
 
     // key:instanceId
     private Map<String, ServerMicroserviceInstance> instances = new ConcurrentHashMap<>();
@@ -118,7 +125,7 @@ public class ServerMicroservice {
     }
 
     public void addInstance(ServerMicroserviceInstance instance) {
-       this.instances.put(instance.getServiceId(), instance);
+       this.instances.put(instance.getInstanceId(), instance);
     }
 
     public void removeInstance(String microserviceInstanceId) {
@@ -220,7 +227,7 @@ public class ServerMicroservice {
 
     public void addSchema(String schemaId, String schemaContent) {
         this.schemaMap.put(schemaId, schemaContent);
-        this.schemas.add(schemaId);
+        // Note:can not do this.schemas.add(schemaId). Because schemas List is set by Arrays.asList(). which means it's fixed size
     }
 
     public String getDescription() {

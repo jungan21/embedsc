@@ -1,15 +1,8 @@
 package org.apache.servicecomb.embedsc.server.model;
 
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.DISCOVER_SERVICE_TYPES;
-
-import net.posick.mDNS.Browse;
-import net.posick.mDNS.DNSSDListener;
-import net.posick.mDNS.MulticastDNSService;
-import org.apache.servicecomb.embedsc.server.listener.ServiceCombMDSNServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,19 +17,6 @@ public class ApplicationContainer {
 
     public Map<String, MicroserviceContainer> getApps() {
         return apps;
-    }
-
-    public ApplicationContainer() {
-        // register event Listener for MDNS service register/unregister events
-        try {
-            // https://github.com/posicks/mdnsjava/blob/master/README.md
-            MulticastDNSService service = new MulticastDNSService();
-            Browse browser = new Browse(DISCOVER_SERVICE_TYPES);
-            DNSSDListener listener = new ServiceCombMDSNServiceListener();
-            service.startServiceDiscovery(browser, listener);
-        } catch (IOException e) {
-            LOGGER.error("Failed to start Asynchronous Service Discovery Service", e);
-        }
     }
 
     public void setApps(Map<String, MicroserviceContainer> apps) {

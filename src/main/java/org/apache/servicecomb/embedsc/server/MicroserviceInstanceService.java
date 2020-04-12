@@ -49,7 +49,7 @@ public class MicroserviceInstanceService {
                 // convernt MDNS service instance format to our server side format: ServerMicroserviceInstance
                 ServerMicroserviceInstance newServerMicroserviceInstance = ServerRegisterUtil.convertToServerMicroserviceInstance(mdnsService);
                 serviceId =  newServerMicroserviceInstance.getServiceId();
-                LOGGER.info("register microservice instance : {}/{}/ to server side in-memory map", serviceId, newServerMicroserviceInstance.getInstanceId());
+                LOGGER.info("register microservice instance , serviceId: {}, instanceId: {}  to server side in-memory map", serviceId, newServerMicroserviceInstance.getInstanceId());
 
                 //for easy query: updaate serverMicroservice instance property and also put ServerMicroserviceInstance into Map<instanceId, ServerMicroserviceInstance>
                 ServerMicroservice serverMicroservice = ServerRegisterUtil.getServerMicroserviceMap().get(serviceId);
@@ -58,11 +58,11 @@ public class MicroserviceInstanceService {
 
                 // build mapping for App, Service, Version, ServiceInstance. need appId to build App -> Service -> Version -> Microservice -> Microservice Instance mapping
                 newServerMicroserviceInstance.setAppId(serverMicroservice.getAppId());
+                newServerMicroserviceInstance.setServiceName(serverMicroservice.getServiceName());
+                newServerMicroserviceInstance.setVersion(serverMicroservice.getVersion());
                 ServerRegisterUtil.buildMappingForMicroserviceInstanceRegistration(newServerMicroserviceInstance);
-
             }
         }
-
         return instanceId;
     }
 

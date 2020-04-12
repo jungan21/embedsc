@@ -5,26 +5,18 @@ import static org.apache.servicecomb.embedsc.EmbedSCConstants.APP_ID;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_ID;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_NAME;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.VERSION;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.LEVEL;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.ALIAS;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMAS;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.STATUS;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.DESCRIPTION;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.REGISTER_BY;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.ENVIRONMENT;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.PROPERTIES;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.FRAMEWORK;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.FRAMEWORK_NAME;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.TIMESTAMP;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.MOD_TIMESTAMP;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_ID;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_CONTENT;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.ENDPOINTS;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.HOST_NAME;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_SUFFIX;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_SPLITER;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_HOST_NAME_SUFFIX;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.INSTANCE_ID;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_ENDPOINT_LIST_SPLITER;
 
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
@@ -43,8 +35,8 @@ import org.xbill.DNS.Name;
 import org.xbill.DNS.TextParseException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -65,28 +57,37 @@ public class ClientRegisterUtil {
             serviceTextAttributesMap.put(SERVICE_NAME, microservice.getServiceName());
             serviceTextAttributesMap.put(VERSION, microservice.getVersion());
             serviceTextAttributesMap.put(SERVICE_ID, serviceId);
-            serviceTextAttributesMap.put(LEVEL, microservice.getLevel());
-            serviceTextAttributesMap.put(ALIAS, microservice.getAlias());
-            serviceTextAttributesMap.put(SCHEMAS, microservice.getSchemas().toString());
             serviceTextAttributesMap.put(STATUS, microservice.getStatus());
-            serviceTextAttributesMap.put(DESCRIPTION, microservice.getDescription());
-            serviceTextAttributesMap.put(REGISTER_BY, microservice.getRegisterBy());
-            serviceTextAttributesMap.put(ENVIRONMENT, microservice.getEnvironment());
-            serviceTextAttributesMap.put(PROPERTIES, microservice.getProperties().toString());
+
+            // have to use special spliter for schema list otherwise, MDNS can't parse the string list properly i.e.  [schema1, schema2]
+            // schema1$schema2
+            List<String> schemas = microservice.getSchemas();
+            StringBuilder sb = new StringBuilder();
+            if ( schemas != null && !schemas.isEmpty()) {
+                for (String schema : schemas) {
+                    sb.append(schema + SCHEMA_ENDPOINT_LIST_SPLITER);
+                }
+                // remove the last $
+                serviceTextAttributesMap.put(SCHEMAS,sb.toString().substring(0, sb.toString().length()-1));
+            }
+            //serviceTextAttributesMap.put(DESCRIPTION, microservice.getDescription());
+            //serviceTextAttributesMap.put(REGISTER_BY, microservice.getRegisterBy());
+            //serviceTextAttributesMap.put(PROPERTIES, microservice.getProperties().toString());
 
             // Framework object has name and value attributes
-            Map<String, String> frameworkMap = new HashMap<>();
-            frameworkMap.put(FRAMEWORK_NAME, microservice.getFramework().getName());
-            frameworkMap.put(VERSION, microservice.getFramework().getVersion());
-            serviceTextAttributesMap.put(FRAMEWORK, frameworkMap.toString());
+            //Map<String, String> frameworkMap = new HashMap<>();
+            //frameworkMap.put(FRAMEWORK_NAME, microservice.getFramework().getName());
+            //frameworkMap.put(VERSION, microservice.getFramework().getVersion());
+            //serviceTextAttributesMap.put(FRAMEWORK, frameworkMap.toString());
 
             // set the timestamp
-            String timestamp = String.valueOf(Instant.now().getEpochSecond());
-            serviceTextAttributesMap.put(TIMESTAMP, timestamp);
-            serviceTextAttributesMap.put(MOD_TIMESTAMP, timestamp);
+            // String timestamp = String.valueOf(Instant.now().getEpochSecond());
+            // serviceTextAttributesMap.put(TIMESTAMP, timestamp);
+            // serviceTextAttributesMap.put(MOD_TIMESTAMP, timestamp);
 
-            // Microservice doesn't have host name, only Microserver Instance has host name
-            return new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), null, addresses, serviceTextAttributesMap);
+            // Microservice doesn't have host name, only Microserver Instance has host name. host name can't be null, use a dummy value here
+            Name hostname = new Name(microservice.getServiceName() + MDNS_HOST_NAME_SUFFIX);
+            return new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), hostname, addresses, serviceTextAttributesMap);
 
         } catch (TextParseException e) {
             LOGGER.error("microservice {} has invalid name", microservice.getServiceName(), e);
@@ -100,7 +101,7 @@ public class ClientRegisterUtil {
     public static ServiceInstance convertToMDNSServiceSchema(String serviceId,  String schemaId, String schemaContent, IpPortManager ipPortManager) {
 
         try {
-            ServiceName serviceName = new ServiceName(serviceId + MDNS_SERVICE_NAME_SPLITER + schemaId + MDNS_SERVICE_NAME_SUFFIX);
+            ServiceName serviceName = new ServiceName(schemaId + MDNS_SERVICE_NAME_SUFFIX);
             IpPort ipPort = ipPortManager.getAvailableAddress();
             InetAddress[] addresses = new InetAddress[] {InetAddress.getByName(ipPort.getHostOrIp())};
 
@@ -110,7 +111,9 @@ public class ClientRegisterUtil {
             serviceSchemaTextAttributesMap.put(SCHEMA_ID, schemaId);
             serviceSchemaTextAttributesMap.put(SCHEMA_CONTENT, schemaContent);
 
-            return new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), null, addresses, serviceSchemaTextAttributesMap);
+            Name hostname = new Name(schemaId + MDNS_HOST_NAME_SUFFIX);
+            // host name can't be null, use a dummy value here
+            return new ServiceInstance(serviceName, 0, 0, ipPort.getPort(), hostname, addresses, serviceSchemaTextAttributesMap);
 
         } catch (TextParseException e) {
             LOGGER.error("microservice has either invalid microserviceId {} OR invalid schemaId {}", serviceId, schemaId, e);
@@ -133,9 +136,22 @@ public class ClientRegisterUtil {
             serviceInstanceTextAttributesMap.put(INSTANCE_ID, microserviceInstanceId);
             serviceInstanceTextAttributesMap.put(STATUS, microserviceInstance.getStatus().toString());
             serviceInstanceTextAttributesMap.put(ENVIRONMENT, microserviceInstance.getEnvironment());
-            serviceInstanceTextAttributesMap.put(PROPERTIES, microserviceInstance.getProperties().toString());
-            serviceInstanceTextAttributesMap.put(TIMESTAMP, microserviceInstance.getTimestamp());
-            serviceInstanceTextAttributesMap.put(ENDPOINTS, microserviceInstance.getEndpoints().toString());
+
+            // have to use special spliter for schema list otherwise, MDNS can't parse the string list properly i.e.  [schema1, schema2]
+            // schema1$schema2
+            List<String> endpoints = microserviceInstance.getEndpoints();
+            StringBuilder sb = new StringBuilder();
+            if ( endpoints != null && !endpoints.isEmpty()) {
+                for (String endpoint : endpoints) {
+                    sb.append(endpoint + SCHEMA_ENDPOINT_LIST_SPLITER);
+                }
+                // remove the last $
+                serviceInstanceTextAttributesMap.put(ENDPOINTS,sb.toString().substring(0, sb.toString().length()-1));
+            }
+
+            //serviceInstanceTextAttributesMap.put(PROPERTIES, microserviceInstance.getProperties().toString());
+            //serviceInstanceTextAttributesMap.put(TIMESTAMP, microserviceInstance.getTimestamp());
+
             String hostName = microserviceInstance.getHostName();
             serviceInstanceTextAttributesMap.put(HOST_NAME, hostName);
             Name mdnsHostName = new Name(hostName + MDNS_HOST_NAME_SUFFIX);
@@ -198,11 +214,12 @@ public class ClientRegisterUtil {
     }
 
     public static String generateServiceId(Microservice microservice){
-        return  microservice.getAppId() + microservice.getServiceName() + microservice.getVersion() + UUID.randomUUID().toString();
+        String serviceIdStringIndex = String.join("/", microservice.getAppId(), microservice.getServiceName(), microservice.getVersion());
+        return UUID.nameUUIDFromBytes(serviceIdStringIndex.getBytes()).toString();
     }
 
     public static String generateServiceInstanceId(MicroserviceInstance microserviceInstance){
-        return microserviceInstance.getServiceId() + UUID.randomUUID().toString();
+        return UUID.randomUUID().toString();
     }
 
 }

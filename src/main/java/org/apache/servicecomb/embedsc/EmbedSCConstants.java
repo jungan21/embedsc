@@ -5,7 +5,6 @@ public interface EmbedSCConstants {
     // MDNS Related
     String REGISTER_SERVICE_TYPE = "registerServiceType";
     String MDNS_SERVICE_NAME_SUFFIX = "._http._tcp.local.";
-    String MDNS_SERVICE_NAME_SPLITER = "_";
     String MDNS_HOST_NAME_SUFFIX = ".local.";
     String[] DISCOVER_SERVICE_TYPES = new String[] {"_http._tcp."}; // "_http._tcp.": Web pages
     // int SCHEMA_CONTENT_CHUNK_SIZE_IN_BYTE = 1200;
@@ -22,6 +21,7 @@ public interface EmbedSCConstants {
     String DESCRIPTION = "description";
     String REGISTER_BY = "registerBy";
     String ENVIRONMENT = "environment";
+    String ENVIRONMENT_DEVELOPMENT = "development";
     String PROPERTIES = "properties";
     String FRAMEWORK = "framework";
     String FRAMEWORK_NAME = "name";
@@ -41,4 +41,5 @@ public interface EmbedSCConstants {
     //others
     String SPLITER_COMMA = ",";
     String SPLITER_MAP_KEY_VALUE = "=";
+    String SCHEMA_ENDPOINT_LIST_SPLITER = "$";
 }

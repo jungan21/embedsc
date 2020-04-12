@@ -137,7 +137,7 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
             return false;
         }
 
-        LOGGER.info("MDNS Service registration center doesn't record the schemaContent:\n {}", schemaContent);
+        LOGGER.info("MDNS Service registration center doesn't record the schemaContent for schemaId:\n {}", schemaId);
 
         // set it to placehold value: {} so that it won't break the main servicecomb service registration logic
         schemaContent = SCHEMA_CONTENT_PLACEHOLDER;

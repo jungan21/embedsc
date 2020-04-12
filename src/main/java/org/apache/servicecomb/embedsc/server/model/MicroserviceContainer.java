@@ -22,7 +22,14 @@ public class MicroserviceContainer {
     }
 
     public MicroserviceVersionContainer getOrCreateMicroserviceVersionContainer(String serviceName) {
-        return services.computeIfAbsent(serviceName, name -> new MicroserviceVersionContainer(applicationContainer, appId, serviceName));
+        // return services.computeIfAbsent(serviceName, name -> new MicroserviceVersionContainer(applicationContainer, appId, serviceName));
+        if (services.containsKey(serviceName)){
+            return services.get(serviceName);
+        } else {
+            MicroserviceVersionContainer microserviceVersionContainer = new MicroserviceVersionContainer(this.applicationContainer, this.appId, serviceName);
+            services.put(serviceName, microserviceVersionContainer);
+            return microserviceVersionContainer;
+        }
     }
 
 }
