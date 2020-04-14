@@ -37,6 +37,7 @@ public interface EmbedSCConstants {
     String INSTANCE_ID = "instanceId";
     String ENDPOINTS = "endpoints";
     String HOST_NAME = "hostName";
+    String INSTANCE_HEARTBEAT_RESPONSE_MESSAGE_OK = "OK";
 
     //others
     String SPLITER_COMMA = ",";

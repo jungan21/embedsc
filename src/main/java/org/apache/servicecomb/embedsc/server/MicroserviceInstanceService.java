@@ -95,4 +95,9 @@ public class MicroserviceInstanceService {
         return instanceMap == null || instanceMap.isEmpty() ? null : new ArrayList<>(instanceMap.values());
     }
 
+    public boolean heartbeat(String microserviceId, String microserviceInstanceId) {
+       Map<String, ServerMicroserviceInstance>  serverMicroserviceInstanceMap = ServerRegisterUtil.getServerMicroserviceInstanceMap().get(microserviceId);
+       return serverMicroserviceInstanceMap != null && serverMicroserviceInstanceMap.containsKey(microserviceInstanceId);
+    }
+
 }

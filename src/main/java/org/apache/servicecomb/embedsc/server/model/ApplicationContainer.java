@@ -57,17 +57,4 @@ public class ApplicationContainer {
         return null;
     }
 
-    public ServerMicroserviceInstance getOrCreateServerMicroserviceInstance(String appId, String serviceName, String version, String instanceId) {
-        ServerMicroservice serverMicroservice = getOrCreateServerMicroservice(appId, serviceName, version);
-        return serverMicroservice.getOrCreateServerMicroserviceInstance(instanceId);
-    }
-
-    public ServerMicroserviceInstance getServerMicroserviceInstance(String appId, String serviceName, String version, String instancId) {
-        ServerMicroservice ServerMicroservice = getServerMicroservice(appId, serviceName, version);
-        if (ServerMicroservice != null && ServerMicroservice.getInstances() != null){
-            return ServerMicroservice.getInstances().get(instancId);
-        }
-        return null;
-    }
-
 }

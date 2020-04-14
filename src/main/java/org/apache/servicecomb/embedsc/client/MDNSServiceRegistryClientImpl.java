@@ -2,6 +2,7 @@ package org.apache.servicecomb.embedsc.client;
 
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_SUFFIX;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_CONTENT_PLACEHOLDER;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.INSTANCE_HEARTBEAT_RESPONSE_MESSAGE_OK;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
@@ -282,7 +283,12 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     @Override
     public HeartbeatResponse heartbeat(String microserviceId, String microserviceInstanceId) {
-        return null;
+        HeartbeatResponse response = new HeartbeatResponse();
+        if (this.microserviceInstanceService.heartbeat(microserviceId, microserviceInstanceId)) {
+            response.setMessage(INSTANCE_HEARTBEAT_RESPONSE_MESSAGE_OK);
+            response.setOk(true);
+        }
+        return response;
     }
 
     @Override
