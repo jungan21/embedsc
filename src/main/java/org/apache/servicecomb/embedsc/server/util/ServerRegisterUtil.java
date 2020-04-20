@@ -192,19 +192,21 @@ public class ServerRegisterUtil {
 
                     // called when a service is registered to MDNS
                     public void serviceDiscovered(Object id, ServiceInstance service) {
-                        LOGGER.info("Microservice is registered to MDNS server {}", service);
                         if(service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
                             Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
                             String registerServiceType = serviceTextAttributesMap.get(EmbedSCConstants.REGISTER_SERVICE_TYPE);
                             switch (RegisterServiceEnumType.valueOf(registerServiceType)) {
                                 case MICROSERVICE:
                                     microserviceService.registerMicroservice(service);
+                                    LOGGER.info("Microservice is registered to MDNS server {}", service);
                                     break;
                                 case MICROSERVICE_INSTANCE:
                                     microserviceInstanceService.registerMicroserviceInstance(service);
+                                    LOGGER.info("Microservice Instance is registered to MDNS server {}", service);
                                     break;
                                 case MICROSERVICE_SCHEMA:
                                     microserviceService.registerSchema(service);
+                                    LOGGER.info("Microservice Schema registered to MDNS server {}", service);
                                     break;
                                 default:
                                     LOGGER.error("Unrecognized service type {} when during registration", registerServiceType);

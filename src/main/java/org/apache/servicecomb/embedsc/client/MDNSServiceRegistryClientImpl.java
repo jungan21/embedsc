@@ -43,8 +43,6 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MDNSServiceRegistryClientImpl.class);
 
-    public static final String MDNS_REGISTRY_KEY = "mdns.registry";
-
     private IpPortManager ipPortManager;
     private MulticastDNSService multicastDNSService;
 
@@ -141,7 +139,7 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
         LOGGER.info("MDNS Service registration center doesn't record the schemaContent for schemaId:\n {}", schemaId);
 
-        // for Consumer to retrieve the provider's schemas TODO: add rest endpoint for consumer to get Map content
+        // for Consumer to retrieve the provider's schemas
         ServerRegisterUtil.schemasMap.put(schemaId, schemaContent);
 
         // set it to placehold value: {} so that it won't break the main servicecomb service registration logic
@@ -166,12 +164,7 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
             return null;
         }
 
-        Map<String, String> schemaMap = microservice.getSchemaMap();
-
-        if (schemaMap != null && !schemaMap.isEmpty()){
-            return schemaMap.get(schemaId);
-        }
-        return null;
+        return microservice.getSchemaMap() != null ? microservice.getSchemaMap().get(schemaId) : null;
     }
 
     @Override
