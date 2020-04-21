@@ -2,12 +2,8 @@ package org.apache.servicecomb.embedsc.server.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerMicroserviceInstance {
-
-    private ApplicationContainer applicationContainer;
 
     private String appId;
 
@@ -25,28 +21,7 @@ public class ServerMicroserviceInstance {
 
     private String status;
 
-    private Map<String, String> properties;
-
-    private String timestamp;
-
-    private String modTimestamp;
-
-    // key: client siede Microservice property/attribute
-    private Map<String, String> serviceInstanceTextAttributesMap = new ConcurrentHashMap<>();
-
     public ServerMicroserviceInstance(){}
-
-    public ServerMicroserviceInstance(String appId, String serviceName, String version, String instanceId) {
-        this.appId = appId;
-        this.serviceName = serviceName;
-        this.version = version;
-        this.instanceId = instanceId;
-    }
-
-    public ServerMicroserviceInstance(ApplicationContainer applicationContainer, String appId, String serviceName, String version, String instanceId) {
-        this(appId, serviceName, version, instanceId);
-        this.applicationContainer = applicationContainer;
-    }
 
     public String getAppId() {
         return appId;
@@ -112,27 +87,4 @@ public class ServerMicroserviceInstance {
         this.status = status;
     }
 
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getModTimestamp() {
-        return modTimestamp;
-    }
-
-    public void setModTimestamp(String modTimestamp) {
-        this.modTimestamp = modTimestamp;
-    }
 }
