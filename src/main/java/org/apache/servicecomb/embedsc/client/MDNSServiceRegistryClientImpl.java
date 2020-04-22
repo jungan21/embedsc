@@ -217,6 +217,7 @@ public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
 
         try {
             // convention to append "._http._tcp.local."
+            LOGGER.info("Start unregister microservice instance. The instance with servcieId: {} instanceId:{}", microserviceId, microserviceInstanceId);
             ServiceName mdnsServiceName = new ServiceName(serverMicroserviceInstance.getServiceName() + MDNS_SERVICE_NAME_SUFFIX);
             // broadcast to MDNS
             if(this.multicastDNSService.unregister(mdnsServiceName)){

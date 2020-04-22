@@ -11,6 +11,7 @@ import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_HOST_NAME_SUFFIX;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.INSTANCE_ID;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_ENDPOINT_LIST_SPLITER;
+import static org.apache.servicecomb.embedsc.EmbedSCConstants.UUID_SPLITER;
 
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
@@ -85,10 +86,10 @@ public class ClientRegisterUtil {
 
     public static String generateServiceId(Microservice microservice){
         String serviceIdStringIndex = String.join("/", microservice.getAppId(), microservice.getServiceName(), microservice.getVersion());
-        return UUID.nameUUIDFromBytes(serviceIdStringIndex.getBytes()).toString();
+        return UUID.nameUUIDFromBytes(serviceIdStringIndex.getBytes()).toString().split(UUID_SPLITER)[0];
     }
 
     public static String generateServiceInstanceId(MicroserviceInstance microserviceInstance){
-        return UUID.randomUUID().toString();
+        return UUID.randomUUID().toString().split(UUID_SPLITER)[0];
     }
 }

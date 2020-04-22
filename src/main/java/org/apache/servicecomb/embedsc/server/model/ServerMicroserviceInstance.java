@@ -87,4 +87,16 @@ public class ServerMicroserviceInstance {
         this.status = status;
     }
 
+    @Override
+    public String toString() {
+        return "ServerMicroserviceInstance{" +
+                "appId='" + appId + '\'' +
+                ", serviceName='" + serviceName + '\'' +
+                ", version='" + version + '\'' +
+                ", instanceId='" + instanceId + '\'' +
+                ", endpoints=" + endpoints +
+                ", hostName='" + hostName + '\'' +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

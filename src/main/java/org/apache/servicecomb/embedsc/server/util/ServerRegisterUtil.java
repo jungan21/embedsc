@@ -11,9 +11,7 @@ import org.xbill.DNS.Message;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.*;
 
@@ -120,8 +118,8 @@ public class ServerRegisterUtil {
         return instanceEndpointList;
     }
 
-    public static List<String> lookupServiceInstanceEndpointsByServiceName(String serviceName) throws IOException {
-        List<String> endpointsList = new ArrayList<>();
+    public static String discoverAddressByServiceName(String serviceName) throws IOException {
+        String endpoint = null;
         ServiceName mdnsServiceName  = new ServiceName(serviceName + MDNS_SERVICE_NAME_SUFFIX);
         Lookup lookup = null;
         try {
@@ -130,7 +128,12 @@ public class ServerRegisterUtil {
             for (ServiceInstance service : services) {
                 Map<String, String> attributesMap = service.getTextAttributes();
                 if (attributesMap != null && attributesMap.containsKey(ENDPOINTS)) {
-                    endpointsList.add(attributesMap.get(ENDPOINTS));
+                    String tempEndpoint = attributesMap.get(ENDPOINTS);
+                    if (!tempEndpoint.contains(SCHEMA_ENDPOINT_LIST_SPLITER)){
+                        endpoint = tempEndpoint.replace(ENDPOINT_PREFIX_REST, ENDPOINT_PREFIX_HTTP);
+                    } else {
+                        endpoint = tempEndpoint.split("\\$")[0].replace(ENDPOINT_PREFIX_REST, ENDPOINT_PREFIX_HTTP);
+                    }
                 }
             }
         } finally {
@@ -142,27 +145,20 @@ public class ServerRegisterUtil {
                 }
             }
         }
-        return endpointsList;
+        return endpoint;
     }
 
-
     private static void startAsyncListenerForRegisteredServices () {
-        String[] serviceTypes = new String[]
-                {
-                        "_http._tcp.",              // Web pages
-                        "_printer._sub._http._tcp", // Printer configuration web pages
-                        "_org.smpte.st2071.device:device_v1.0._sub._mdc._tcp",  // SMPTE ST2071 Devices
-                        "_org.smpte.st2071.service:service_v1.0._sub._mdc._tcp"  // SMPTE ST2071 Services
-                };
 
             try {
 
                 MulticastDNSService service = new MulticastDNSService();
-                service.startServiceDiscovery(new Browse(serviceTypes), new DNSSDListener() {
+                service.startServiceDiscovery(new Browse(DISCOVER_SERVICE_TYPES), new DNSSDListener() {
 
                     // called when a service is registered to MDNS
                     public void serviceDiscovered(Object id, ServiceInstance service) {
-                        if(service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
+                        LOGGER.info("Going to register a service instance {}", service.getName().toString());
+                        if (service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
                             Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
                             microserviceInstanceService.registerMicroserviceInstance(service);
                             LOGGER.info("Microservice Instance is registered to MDNS server {}", serviceTextAttributesMap);
@@ -181,8 +177,8 @@ public class ServerRegisterUtil {
 
                     // called when a service is unregistered from MDNS OR service process is killed
                     public void serviceRemoved(Object id, ServiceInstance service) {
-                        LOGGER.info("Going to unregister a service instance {}", service);
-                        if(service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
+                        LOGGER.info("Going to unregister a service instance {}", service.getTextAttributes());
+                        if (service != null && service.getTextAttributes() != null && !service.getTextAttributes().isEmpty()) {
                             Map<String, String> serviceTextAttributesMap = service.getTextAttributes();
                             microserviceInstanceService.unregisterMicroserviceInstance(serviceTextAttributesMap.get(SERVICE_ID), serviceTextAttributesMap.get(INSTANCE_ID));
                             LOGGER.info("Microservice Instance is unregistered from MDNS server {}", service.getTextAttributes());
@@ -208,7 +204,7 @@ public class ServerRegisterUtil {
                 });
 
             } catch (IOException ioException) {
-                LOGGER.error("Failed to start Async Service Register/Unregister Listener for MDNS service registry center",ioException);
+                LOGGER.error("Failed to start Async Service Register/Unregister Listener for MDNS service registry center", ioException);
             }
     }
 }
