@@ -1,8 +1,8 @@
-package org.apache.servicecomb.embedsc.server;
+package org.apache.servicecomb.zeroconfigsc.server;
 
 import net.posick.mDNS.ServiceInstance;
-import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
-import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
+import org.apache.servicecomb.zeroconfigsc.server.model.ServerMicroserviceInstance;
+import org.apache.servicecomb.zeroconfigsc.server.util.ServerRegisterUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.*;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.*;
 
 public class MicroserviceInstanceService {
 

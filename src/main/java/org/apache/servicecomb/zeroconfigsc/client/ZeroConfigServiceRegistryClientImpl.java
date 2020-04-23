@@ -1,15 +1,15 @@
-package org.apache.servicecomb.embedsc.client;
+package org.apache.servicecomb.zeroconfigsc.client;
 
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_SUFFIX;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.INSTANCE_HEARTBEAT_RESPONSE_MESSAGE_OK;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.MDNS_SERVICE_NAME_SUFFIX;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.INSTANCE_HEARTBEAT_RESPONSE_MESSAGE_OK;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import net.posick.mDNS.MulticastDNSService;
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
-import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
-import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
+import org.apache.servicecomb.zeroconfigsc.server.MicroserviceInstanceService;
+import org.apache.servicecomb.zeroconfigsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
 import org.apache.servicecomb.serviceregistry.api.registry.*;
 import org.apache.servicecomb.serviceregistry.api.response.FindInstancesResponse;
@@ -34,15 +34,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MDNSServiceRegistryClientImpl implements ServiceRegistryClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MDNSServiceRegistryClientImpl.class);
+public class ZeroConfigServiceRegistryClientImpl implements ServiceRegistryClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZeroConfigServiceRegistryClientImpl.class);
 
     private IpPortManager ipPortManager;
     private MulticastDNSService multicastDNSService;
     private MicroserviceInstanceService microserviceInstanceService;
     private Microservice currentMicroservice;
 
-    public MDNSServiceRegistryClientImpl(ServiceRegistryConfig serviceRegistryConfig){
+    public ZeroConfigServiceRegistryClientImpl(ServiceRegistryConfig serviceRegistryConfig){
         this.ipPortManager = new IpPortManager(serviceRegistryConfig);
         try {
             this.multicastDNSService = new MulticastDNSService();

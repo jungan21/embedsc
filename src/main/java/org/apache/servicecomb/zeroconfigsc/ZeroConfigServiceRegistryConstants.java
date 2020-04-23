@@ -1,6 +1,6 @@
-package org.apache.servicecomb.embedsc;
+package org.apache.servicecomb.zeroconfigsc;
 
-public interface EmbedSCConstants {
+public interface ZeroConfigServiceRegistryConstants {
 
     // MDNS Related
     String MDNS_SERVICE_NAME_SUFFIX = "._http._tcp.local.";

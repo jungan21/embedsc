@@ -1,10 +1,10 @@
-package org.apache.servicecomb.embedsc.server.util;
+package org.apache.servicecomb.zeroconfigsc.server.util;
 
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_ENDPOINT_LIST_SPLITER;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.SCHEMA_ENDPOINT_LIST_SPLITER;
 
 import net.posick.mDNS.*;
-import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
-import org.apache.servicecomb.embedsc.server.model.*;
+import org.apache.servicecomb.zeroconfigsc.server.MicroserviceInstanceService;
+import org.apache.servicecomb.zeroconfigsc.server.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Message;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.*;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.*;
 
 public class ServerRegisterUtil {
 

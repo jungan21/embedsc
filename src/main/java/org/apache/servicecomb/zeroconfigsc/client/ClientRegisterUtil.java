@@ -1,21 +1,21 @@
-package org.apache.servicecomb.embedsc.client;
+package org.apache.servicecomb.zeroconfigsc.client;
 
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.APP_ID;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_ID;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_NAME;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.VERSION;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.STATUS;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.ENDPOINTS;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.HOST_NAME;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_SERVICE_NAME_SUFFIX;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.MDNS_HOST_NAME_SUFFIX;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.INSTANCE_ID;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.SCHEMA_ENDPOINT_LIST_SPLITER;
-import static org.apache.servicecomb.embedsc.EmbedSCConstants.UUID_SPLITER;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.APP_ID;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.SERVICE_ID;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.SERVICE_NAME;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.VERSION;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.STATUS;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.ENDPOINTS;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.HOST_NAME;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.MDNS_SERVICE_NAME_SUFFIX;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.MDNS_HOST_NAME_SUFFIX;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.INSTANCE_ID;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.SCHEMA_ENDPOINT_LIST_SPLITER;
+import static org.apache.servicecomb.zeroconfigsc.ZeroConfigServiceRegistryConstants.UUID_SPLITER;
 
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
-import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
+import org.apache.servicecomb.zeroconfigsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.foundation.common.net.IpPort;
 import org.apache.servicecomb.serviceregistry.api.registry.Microservice;
 import org.apache.servicecomb.serviceregistry.api.registry.MicroserviceInstance;

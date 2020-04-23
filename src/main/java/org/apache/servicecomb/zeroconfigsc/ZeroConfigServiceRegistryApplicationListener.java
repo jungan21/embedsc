@@ -1,7 +1,7 @@
-package org.apache.servicecomb.embedsc;
+package org.apache.servicecomb.zeroconfigsc;
 
-import org.apache.servicecomb.embedsc.client.MDNSServiceRegistryClientImpl;
-import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;
+import org.apache.servicecomb.zeroconfigsc.client.ZeroConfigServiceRegistryClientImpl;
+import org.apache.servicecomb.zeroconfigsc.server.util.ServerRegisterUtil;
 import org.apache.servicecomb.foundation.common.utils.BeanUtils;
 import org.apache.servicecomb.serviceregistry.ServiceRegistry;
 import org.apache.servicecomb.serviceregistry.client.ServiceRegistryClient;
@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 @Configuration
 @Order(-1001)
-public class EmbedSCApplicationListener implements ApplicationListener<ApplicationEvent>, ApplicationContextAware {
+public class ZeroConfigServiceRegistryApplicationListener implements ApplicationListener<ApplicationEvent>, ApplicationContextAware {
 
   private ApplicationContext applicationContext;
 
@@ -31,7 +31,7 @@ public class EmbedSCApplicationListener implements ApplicationListener<Applicati
 
     ServiceRegistryConfig serviceRegistryConfig = ServiceRegistryConfig.INSTANCE;
     Function<ServiceRegistry, ServiceRegistryClient> serviceRegistryClientConstructor =
-            serviceRegistry -> new MDNSServiceRegistryClientImpl(serviceRegistryConfig);
+            serviceRegistry -> new ZeroConfigServiceRegistryClientImpl(serviceRegistryConfig);
     serviceRegistryConfig.setServiceRegistryClientConstructor(serviceRegistryClientConstructor);
   }
 

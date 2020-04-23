@@ -1,4 +1,4 @@
-package org.apache.servicecomb.embedsc.server.model;
+package org.apache.servicecomb.zeroconfigsc.server.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +22,6 @@ public class ServerMicroserviceInstance {
     private String status;
 
     public ServerMicroserviceInstance(){}
-
-    public String getAppId() {
-        return appId;
-    }
 
     public void setAppId(String appId) {
         this.appId = appId;
