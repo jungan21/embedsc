@@ -1,4 +1,4 @@
-package org.apache.servicecomb.embedsc.core;
+package org.apache.servicecomb.embedsc;
 
 import org.apache.servicecomb.embedsc.client.MDNSServiceRegistryClientImpl;
 import org.apache.servicecomb.embedsc.server.util.ServerRegisterUtil;

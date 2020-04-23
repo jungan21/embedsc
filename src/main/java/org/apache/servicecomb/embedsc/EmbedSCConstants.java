@@ -18,24 +18,7 @@ public interface EmbedSCConstants {
     String SERVICE_NAME = "serviceName";
     String VERSION = "version";
     String SERVICE_ID = "serviceId";
-//    String LEVEL = "level";
-//    String ALIAS = "alias";
-//    String SCHEMAS = "schemas";
     String STATUS = "status";
-//    String DESCRIPTION = "description";
-//    String REGISTER_BY = "registerBy";
-//    String ENVIRONMENT = "environment";
-//    String ENVIRONMENT_DEVELOPMENT = "development";
-//    String PROPERTIES = "properties";
-//    String FRAMEWORK = "framework";
-//    String FRAMEWORK_NAME = "name";
-//    String TIMESTAMP = "timestamp";
-//    String MOD_TIMESTAMP = "modTimestamp";
-//
-//    // Microservice Schema Attributes
-//    String SCHEMA_ID = "schemaId";
-//    String SCHEMA_CONTENT = "schemaContent";
-//    String SCHEMA_CONTENT_PLACEHOLDER = "{}";
 
     // Microservice Instance Attributes
     String INSTANCE_ID = "instanceId";
@@ -46,7 +29,6 @@ public interface EmbedSCConstants {
     String ENDPOINT_PREFIX_HTTP = "http";
 
     //others
-//    String SPLITER_COMMA = ",";
     String SPLITER_MAP_KEY_VALUE = "=";
     String SCHEMA_ENDPOINT_LIST_SPLITER = "$";
     String UUID_SPLITER = "-";

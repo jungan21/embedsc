@@ -1,4 +1,4 @@
-package org.apache.servicecomb.embedsc.client.util;
+package org.apache.servicecomb.embedsc.client;
 
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.APP_ID;
 import static org.apache.servicecomb.embedsc.EmbedSCConstants.SERVICE_ID;

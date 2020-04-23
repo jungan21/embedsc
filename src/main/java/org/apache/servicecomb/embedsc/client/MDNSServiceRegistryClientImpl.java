@@ -8,7 +8,6 @@ import com.google.common.hash.Hashing;
 import net.posick.mDNS.MulticastDNSService;
 import net.posick.mDNS.ServiceInstance;
 import net.posick.mDNS.ServiceName;
-import org.apache.servicecomb.embedsc.client.util.ClientRegisterUtil;
 import org.apache.servicecomb.embedsc.server.MicroserviceInstanceService;
 import org.apache.servicecomb.embedsc.server.model.ServerMicroserviceInstance;
 import org.apache.servicecomb.foundation.vertx.AsyncResultCallback;
